@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from app.core.config import get_settings
 
 from app.main import app
 
@@ -20,3 +21,8 @@ def test_health_check() -> None:
         "status": "healthy",
         "environment": "development",
     }
+
+def test_settings_database_url() -> None:
+    settings = get_settings()
+
+    assert settings.database_url.startswith("postgresql+psycopg://")
