@@ -30,3 +30,8 @@ class User(Base):
     back_populates="user",
     cascade="all, delete-orphan",
     )
+    import_jobs = relationship(
+    "ImportJob",
+    back_populates="user",
+    cascade="all, delete-orphan",
+    )
