@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 
 from app.api.routes.auth import router as auth_router
-from app.core.config import get_settings
-
+from app.api.routes.imports import router as imports_router
 from app.api.routes.products import router as products_router
+from app.core.config import get_settings
 
 settings = get_settings()
 
@@ -16,6 +16,7 @@ app = FastAPI(
 
 app.include_router(auth_router)
 app.include_router(products_router)
+app.include_router(imports_router)
 
 @app.get("/")
 def read_root() -> dict[str, str]:
