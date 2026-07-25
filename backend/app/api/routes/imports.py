@@ -11,6 +11,8 @@ from app.api.dependencies import get_current_user
 
 from app.services.import_service import create_import_job
 
+from app.services import create_import_job, parse_product_csv
+
 router = APIRouter(
     prefix="/imports",
     tags=["Imports"],
@@ -41,6 +43,8 @@ async def upload_csv(
             detail="The uploaded file must have a CSV content type.",
         )
 
+    rows = await parse_product_csv(file)
+
     job = create_import_job(
         user_id=current_user.id,
         filename=filename,
@@ -50,4 +54,5 @@ async def upload_csv(
         "import_job_id": job.id,
         "filename": job.filename,
         "status": job.status,
+        "total_rows": len(rows),
     }

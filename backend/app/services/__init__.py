@@ -18,3 +18,5 @@ from app.services.product_service import (
 )
 
 from .import_service import create_import_job
+
+from app.services.csv_parser import parse_product_csv
