@@ -1,26 +1,22 @@
-from app.db.session import SessionLocal
+from sqlalchemy.orm import Session
+
 from app.models.import_job import ImportJob, ImportStatus
 
 
 def create_import_job(
     *,
+    db: Session,
     user_id: int,
     filename: str,
 ) -> ImportJob:
-    db = SessionLocal()
+    job = ImportJob(
+        user_id=user_id,
+        filename=filename,
+        status=ImportStatus.PENDING,
+    )
 
-    try:
-        job = ImportJob(
-            user_id=user_id,
-            filename=filename,
-            status=ImportStatus.PENDING,
-        )
+    db.add(job)
+    db.flush()
+    db.refresh(job)
 
-        db.add(job)
-        db.commit()
-        db.refresh(job)
-
-        return job
-
-    finally:
-        db.close()
+    return job
