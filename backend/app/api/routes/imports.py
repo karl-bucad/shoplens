@@ -22,6 +22,9 @@ from app.services import (
     parse_product_csv,
 )
 
+from app.models.import_job import ImportJob
+from app.schemas import ImportJobResponse
+
 router = APIRouter(
     prefix="/imports",
     tags=["Imports"],
@@ -81,3 +84,18 @@ async def upload_csv(
         "successful_rows": completed_job.successful_rows,
         "failed_rows": completed_job.failed_rows,
     }
+    
+@router.get(
+    "",
+    response_model=list[ImportJobResponse],
+)
+def list_import_jobs(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return (
+        db.query(ImportJob)
+        .filter(ImportJob.user_id == current_user.id)
+        .order_by(ImportJob.created_at.desc())
+        .all()
+    )

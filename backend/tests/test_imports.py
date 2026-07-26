@@ -178,3 +178,62 @@ def test_csv_import_tracks_failed_rows() -> None:
         assert products[0].name == "LED Strip Lights"
 
     clear_test_data()
+    
+def test_authenticated_user_can_list_import_jobs() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    first_upload = client.post(
+        "/imports/csv",
+        headers=headers,
+        files={
+            "file": (
+                "first.csv",
+                "name,shop_name,category\n"
+                "Product One,Shop One,Beauty\n",
+                "text/csv",
+            )
+        },
+    )
+
+    second_upload = client.post(
+        "/imports/csv",
+        headers=headers,
+        files={
+            "file": (
+                "second.csv",
+                "name,shop_name,category\n"
+                "Product Two,Shop Two,Fitness\n",
+                "text/csv",
+            )
+        },
+    )
+
+    assert first_upload.status_code == 201
+    assert second_upload.status_code == 201
+
+    response = client.get(
+        "/imports",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+
+    jobs = response.json()
+
+    assert len(jobs) == 2
+    assert jobs[0]["filename"] == "second.csv"
+    assert jobs[1]["filename"] == "first.csv"
+
+    assert jobs[0]["status"] == "completed"
+    assert jobs[0]["total_rows"] == 1
+    assert jobs[0]["successful_rows"] == 1
+    assert jobs[0]["failed_rows"] == 0
+
+    clear_test_data()
+    
+def test_unauthenticated_user_cannot_list_import_jobs() -> None:
+    response = client.get("/imports")
+
+    assert response.status_code == 401
