@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 
 from pydantic import BaseModel
 
@@ -16,3 +16,7 @@ class CategoryAnalyticsResponse(BaseModel):
 class ShopAnalyticsResponse(BaseModel):
     shop_name: str
     product_count: int
+    
+class ImportAnalyticsResponse(BaseModel):
+    date: date
+    import_count: int

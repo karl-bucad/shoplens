@@ -101,3 +101,29 @@ def get_shop_analytics(
         }
         for shop_name, product_count in rows
     ]
+    
+def get_import_analytics(
+    *,
+    db: Session,
+    user_id: int,
+) -> list[dict[str, object]]:
+    import_date = func.date(ImportJob.created_at)
+
+    rows = (
+        db.query(
+            import_date.label("date"),
+            func.count(ImportJob.id).label("import_count"),
+        )
+        .filter(ImportJob.user_id == user_id)
+        .group_by(import_date)
+        .order_by(import_date.asc())
+        .all()
+    )
+
+    return [
+        {
+            "date": import_day,
+            "import_count": import_count,
+        }
+        for import_day, import_count in rows
+    ]

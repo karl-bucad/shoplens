@@ -301,3 +301,73 @@ def test_unauthenticated_user_cannot_view_shop_analytics() -> None:
     response = client.get("/analytics/shops")
 
     assert response.status_code == 401
+    
+def test_authenticated_user_can_view_import_analytics() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    first_response = client.post(
+        "/imports/csv",
+        headers=headers,
+        files={
+            "file": (
+                "first-import.csv",
+                "name,shop_name,category\n"
+                "Product One,Shop One,Beauty\n",
+                "text/csv",
+            )
+        },
+    )
+
+    second_response = client.post(
+        "/imports/csv",
+        headers=headers,
+        files={
+            "file": (
+                "second-import.csv",
+                "name,shop_name,category\n"
+                "Product Two,Shop Two,Fitness\n",
+                "text/csv",
+            )
+        },
+    )
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 201
+
+    response = client.get(
+        "/analytics/imports",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 1
+    assert data[0]["import_count"] == 2
+    assert "date" in data[0]
+
+    clear_test_data()
+
+
+def test_empty_import_analytics_returns_empty_list() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+
+    response = client.get(
+        "/analytics/imports",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+    clear_test_data()
+
+
+def test_unauthenticated_user_cannot_view_import_analytics() -> None:
+    response = client.get("/analytics/imports")
+
+    assert response.status_code == 401

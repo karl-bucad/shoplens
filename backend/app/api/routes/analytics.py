@@ -7,11 +7,13 @@ from app.schemas import (
     AnalyticsOverviewResponse,
     CategoryAnalyticsResponse,
     ShopAnalyticsResponse,
+    ImportAnalyticsResponse,
 )
 from app.services import (
     get_analytics_overview,
     get_category_analytics,
     get_shop_analytics,
+    get_import_analytics,
 )
 
 
@@ -56,6 +58,19 @@ def read_shop_analytics(
     db: Session = Depends(get_db),
 ):
     return get_shop_analytics(
+        db=db,
+        user_id=current_user.id,
+    )
+    
+@router.get(
+    "/imports",
+    response_model=list[ImportAnalyticsResponse],
+)
+def read_import_analytics(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return get_import_analytics(
         db=db,
         user_id=current_user.id,
     )
