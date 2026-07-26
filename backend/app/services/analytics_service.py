@@ -74,3 +74,30 @@ def get_category_analytics(
         }
         for category, product_count in rows
     ]
+
+def get_shop_analytics(
+    *,
+    db: Session,
+    user_id: int,
+) -> list[dict[str, str | int]]:
+    rows = (
+        db.query(
+            Product.shop_name,
+            func.count(Product.id).label("product_count"),
+        )
+        .filter(
+            Product.user_id == user_id,
+            Product.shop_name.isnot(None),
+        )
+        .group_by(Product.shop_name)
+        .order_by(func.count(Product.id).desc())
+        .all()
+    )
+
+    return [
+        {
+            "shop_name": shop_name,
+            "product_count": product_count,
+        }
+        for shop_name, product_count in rows
+    ]

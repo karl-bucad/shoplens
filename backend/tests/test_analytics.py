@@ -223,3 +223,81 @@ def test_unauthenticated_user_cannot_view_category_analytics() -> None:
     response = client.get("/analytics/categories")
 
     assert response.status_code == 401
+    
+def test_authenticated_user_can_view_shop_analytics() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    client.post(
+        "/products",
+        headers=headers,
+        json={
+            "name": "Product One",
+            "shop_name": "GlowTech",
+            "category": "Home",
+        },
+    )
+
+    client.post(
+        "/products",
+        headers=headers,
+        json={
+            "name": "Product Two",
+            "shop_name": "GlowTech",
+            "category": "Beauty",
+        },
+    )
+
+    client.post(
+        "/products",
+        headers=headers,
+        json={
+            "name": "Product Three",
+            "shop_name": "BeautyLab",
+            "category": "Beauty",
+        },
+    )
+
+    response = client.get(
+        "/analytics/shops",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data == [
+        {
+            "shop_name": "GlowTech",
+            "product_count": 2,
+        },
+        {
+            "shop_name": "BeautyLab",
+            "product_count": 1,
+        },
+    ]
+
+    clear_test_data()
+
+
+def test_empty_shop_analytics_returns_empty_list() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+
+    response = client.get(
+        "/analytics/shops",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+    clear_test_data()
+
+
+def test_unauthenticated_user_cannot_view_shop_analytics() -> None:
+    response = client.get("/analytics/shops")
+
+    assert response.status_code == 401

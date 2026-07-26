@@ -12,3 +12,7 @@ class AnalyticsOverviewResponse(BaseModel):
 class CategoryAnalyticsResponse(BaseModel):
     category: str
     product_count: int
+    
+class ShopAnalyticsResponse(BaseModel):
+    shop_name: str
+    product_count: int
