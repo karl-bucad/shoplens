@@ -6,24 +6,17 @@ from fastapi import (
     UploadFile,
     status,
 )
-
-from app.api.dependencies import get_current_user
-
-from app.services.import_service import create_import_job
-
-from app.services import create_import_job, parse_product_csv
-
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_current_user
 from app.db.session import get_db
+from app.models.import_job import ImportJob
+from app.schemas import ImportJobResponse
 from app.services import (
     create_import_job,
     import_products_from_rows,
     parse_product_csv,
 )
-
-from app.models.import_job import ImportJob
-from app.schemas import ImportJobResponse
 
 router = APIRouter(
     prefix="/imports",
