@@ -47,3 +47,30 @@ def get_analytics_overview(
         "total_categories": total_categories or 0,
         "latest_import": latest_import,
     }
+    
+def get_category_analytics(
+    *,
+    db: Session,
+    user_id: int,
+) -> list[dict[str, str | int]]:
+    rows = (
+        db.query(
+            Product.category,
+            func.count(Product.id).label("product_count"),
+        )
+        .filter(
+            Product.user_id == user_id,
+            Product.category.isnot(None),
+        )
+        .group_by(Product.category)
+        .order_by(func.count(Product.id).desc())
+        .all()
+    )
+
+    return [
+        {
+            "category": category,
+            "product_count": product_count,
+        }
+        for category, product_count in rows
+    ]

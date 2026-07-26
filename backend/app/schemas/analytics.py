@@ -8,3 +8,7 @@ class AnalyticsOverviewResponse(BaseModel):
     total_shops: int
     total_categories: int
     latest_import: datetime | None
+    
+class CategoryAnalyticsResponse(BaseModel):
+    category: str
+    product_count: int

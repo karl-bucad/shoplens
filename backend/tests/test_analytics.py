@@ -145,3 +145,81 @@ def test_unauthenticated_user_cannot_view_analytics_overview() -> None:
     response = client.get("/analytics/overview")
 
     assert response.status_code == 401
+    
+def test_authenticated_user_can_view_category_analytics() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    client.post(
+        "/products",
+        headers=headers,
+        json={
+            "name": "Product One",
+            "shop_name": "Shop One",
+            "category": "Beauty",
+        },
+    )
+
+    client.post(
+        "/products",
+        headers=headers,
+        json={
+            "name": "Product Two",
+            "shop_name": "Shop Two",
+            "category": "Beauty",
+        },
+    )
+
+    client.post(
+        "/products",
+        headers=headers,
+        json={
+            "name": "Product Three",
+            "shop_name": "Shop Three",
+            "category": "Fitness",
+        },
+    )
+
+    response = client.get(
+        "/analytics/categories",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data == [
+        {
+            "category": "Beauty",
+            "product_count": 2,
+        },
+        {
+            "category": "Fitness",
+            "product_count": 1,
+        },
+    ]
+
+    clear_test_data()
+
+
+def test_empty_category_analytics_returns_empty_list() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+
+    response = client.get(
+        "/analytics/categories",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+    clear_test_data()
+
+
+def test_unauthenticated_user_cannot_view_category_analytics() -> None:
+    response = client.get("/analytics/categories")
+
+    assert response.status_code == 401
