@@ -1,10 +1,7 @@
+import LoginPage from './pages/LoginPage'
+
 function App() {
-  return (
-    <main>
-      <h1>ShopLens</h1>
-      <p>TikTok Shop analytics made simple.</p>
-    </main>
-  )
+  return <LoginPage />
 }
 
 export default App
