@@ -1,80 +1,127 @@
 import { useEffect, useState } from 'react'
-import { getAnalyticsOverview } from '../api/analytics'
+import {
+    getAnalyticsOverview,
+    getCategoryAnalytics,
+} from '../api/analytics'
 
 function formatDate(dateString) {
-  if (!dateString) {
-    return 'No imports yet'
-  }
+    if (!dateString) {
+        return 'No imports yet'
+    }
 
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date(dateString))
+    return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(new Date(dateString))
 }
 
 function DashboardPage() {
-  const [overview, setOverview] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState('')
+    const [overview, setOverview] = useState(null)
+    const [categories, setCategories] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState('')
 
-  useEffect(() => {
-    async function loadOverview() {
-      try {
-        const data = await getAnalyticsOverview()
-        setOverview(data)
-      } catch {
-        setError('Unable to load dashboard analytics.')
-      } finally {
-        setIsLoading(false)
-      }
+    useEffect(() => {
+        async function loadDashboard() {
+            try {
+                const [overviewData, categoryData] = await Promise.all([
+                    getAnalyticsOverview(),
+                    getCategoryAnalytics(),
+                ])
+
+                setOverview(overviewData)
+                setCategories(categoryData)
+            } catch {
+                setError('Unable to load dashboard analytics.')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        loadDashboard()
+    }, [])
+
+    if (isLoading) {
+        return <p>Loading dashboard...</p>
     }
 
-    loadOverview()
-  }, [])
+    if (error) {
+        return <p>{error}</p>
+    }
 
-  if (isLoading) {
-    return <p>Loading dashboard...</p>
-  }
+    return (
+        <>
+            <div className="page-header">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p>Monitor your ShopLens product data.</p>
+                </div>
+            </div>
 
-  if (error) {
-    return <p>{error}</p>
-  }
+            <section className="overview-grid">
+                <article className="overview-card">
+                    <p>Total Products</p>
+                    <h2>{overview.total_products}</h2>
+                </article>
 
-  return (
-    <>
-      <div className="page-header">
-        <div>
-          <h1>Dashboard</h1>
-          <p>Monitor your ShopLens product data.</p>
-        </div>
-      </div>
+                <article className="overview-card">
+                    <p>Total Shops</p>
+                    <h2>{overview.total_shops}</h2>
+                </article>
 
-      <section className="overview-grid">
-        <article className="overview-card">
-          <p>Total Products</p>
-          <h2>{overview.total_products}</h2>
-        </article>
+                <article className="overview-card">
+                    <p>Total Categories</p>
+                    <h2>{overview.total_categories}</h2>
+                </article>
 
-        <article className="overview-card">
-          <p>Total Shops</p>
-          <h2>{overview.total_shops}</h2>
-        </article>
+                <article className="overview-card">
+                    <p>Latest Import</p>
+                    <h2 className="overview-date">
+                        {formatDate(overview.latest_import)}
+                    </h2>
+                </article>
+            </section>
 
-        <article className="overview-card">
-          <p>Total Categories</p>
-          <h2>{overview.total_categories}</h2>
-        </article>
+            <section className="analytics-section">
+                <div className="section-header">
+                    <h2>Products by Category</h2>
+                    <p>See how your products are distributed across categories.</p>
+                </div>
 
-        <article className="overview-card">
-          <p>Latest Import</p>
-          <h2 className="overview-date">
-            {formatDate(overview.latest_import)}
-          </h2>
-        </article>
-      </section>
-    </>
-  )
+                <div className="category-card">
+                    {categories.length === 0 ? (
+                        <p className="empty-state">No category data available.</p>
+                    ) : (
+                        <div className="category-list">
+                            {categories.map((item) => {
+                                const percentage =
+                                    overview.total_products > 0
+                                        ? (item.product_count / overview.total_products) * 100
+                                        : 0
+
+                                return (
+                                    <div className="category-row" key={item.category}>
+                                        <div className="category-row-header">
+                                            <span>{item.category}</span>
+                                            <span>{item.product_count} products</span>
+                                        </div>
+
+                                        <div className="category-track">
+                                            <div
+                                                className="category-bar"
+                                                style={{ width: `${percentage}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </div>
+            </section>
+        </>
+    )
 }
 
 export default DashboardPage
