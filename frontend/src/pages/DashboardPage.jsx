@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
     getAnalyticsOverview,
     getCategoryAnalytics,
+    getShopAnalytics,
 } from '../api/analytics'
 
 function formatDate(dateString) {
@@ -19,19 +20,22 @@ function formatDate(dateString) {
 function DashboardPage() {
     const [overview, setOverview] = useState(null)
     const [categories, setCategories] = useState([])
+    const [shops, setShops] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
     useEffect(() => {
         async function loadDashboard() {
             try {
-                const [overviewData, categoryData] = await Promise.all([
+                const [overviewData, categoryData, shopData] = await Promise.all([
                     getAnalyticsOverview(),
                     getCategoryAnalytics(),
+                    getShopAnalytics(),
                 ])
 
                 setOverview(overviewData)
                 setCategories(categoryData)
+                setShops(shopData)
             } catch {
                 setError('Unable to load dashboard analytics.')
             } finally {
@@ -105,6 +109,44 @@ function DashboardPage() {
                                         <div className="category-row-header">
                                             <span>{item.category}</span>
                                             <span>{item.product_count} products</span>
+                                        </div>
+
+                                        <div className="category-track">
+                                            <div
+                                                className="category-bar"
+                                                style={{ width: `${percentage}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            <section className="analytics-section">
+                <div className="section-header">
+                    <h2>Products by Shop</h2>
+                    <p>Compare how many products belong to each shop.</p>
+                </div>
+
+                <div className="category-card">
+                    {shops.length === 0 ? (
+                        <p className="empty-state">No shop data available.</p>
+                    ) : (
+                        <div className="category-list">
+                            {shops.map((shop) => {
+                                const percentage =
+                                    overview.total_products > 0
+                                        ? (shop.product_count / overview.total_products) * 100
+                                        : 0
+
+                                return (
+                                    <div className="category-row" key={shop.shop_name}>
+                                        <div className="category-row-header">
+                                            <span>{shop.shop_name}</span>
+                                            <span>{shop.product_count} products</span>
                                         </div>
 
                                         <div className="category-track">
