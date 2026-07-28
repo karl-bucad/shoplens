@@ -226,3 +226,63 @@ button {
   margin: 0;
   color: #64748b;
 }
+
+.table-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.products-table th,
+.products-table td {
+  padding: 18px 22px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.products-table th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.products-table td {
+  color: #334155;
+}
+
+.products-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.products-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.product-name {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.category-badge {
+  display: inline-flex;
+  padding: 5px 10px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}

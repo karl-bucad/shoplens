@@ -1,10 +1,86 @@
+import { useEffect, useState } from 'react'
+import { getProducts } from '../api/products'
+
+function formatDate(dateString) {
+    return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(new Date(dateString))
+}
+
 function ProductsPage() {
+    const [products, setProducts] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState('')
+
+    useEffect(() => {
+        async function loadProducts() {
+            try {
+                const data = await getProducts()
+                setProducts(data)
+            } catch {
+                setError('Unable to load products.')
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        loadProducts()
+    }, [])
+
+    if (isLoading) {
+        return <p>Loading products...</p>
+    }
+
+    if (error) {
+        return <p>{error}</p>
+    }
+
     return (
-      <>
-        <h1>Products</h1>
-        <p>Browse and manage imported products.</p>
-      </>
+        <>
+            <div className="page-header">
+                <div>
+                    <h1>Products</h1>
+                    <p>Browse and manage your imported product data.</p>
+                </div>
+            </div>
+
+            <div className="table-card">
+                {products.length === 0 ? (
+                    <p className="empty-state">No products available.</p>
+                ) : (
+                    <div className="table-wrapper">
+                        <table className="products-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Shop</th>
+                                    <th>Category</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {products.map((product) => (
+                                    <tr key={product.id}>
+                                        <td className="product-name">{product.name}</td>
+                                        <td>{product.shop_name}</td>
+                                        <td>
+                                            <span className="category-badge">
+                                                {product.category}
+                                            </span>
+                                        </td>
+                                        <td>{formatDate(product.created_at)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+        </>
     )
-  }
-  
-  export default ProductsPage
+}
+
+export default ProductsPage
