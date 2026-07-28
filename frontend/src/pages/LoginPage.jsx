@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { loginUser } from '../api/auth'
 import { useAuth } from '../context/useAuth'
+import { Navigate, useNavigate } from 'react-router-dom'
 
 function LoginPage() {
-  const { login } = useAuth()
+    const { login, isAuthenticated } = useAuth()
+    const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -29,6 +31,7 @@ function LoginPage() {
     try {
       const data = await loginUser(formData)
       login(data.access_token)
+      navigate('/dashboard', { replace: true })
     } catch (requestError) {
       const message =
         requestError.response?.data?.detail ??
@@ -38,6 +41,10 @@ function LoginPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
   }
 
   return (
