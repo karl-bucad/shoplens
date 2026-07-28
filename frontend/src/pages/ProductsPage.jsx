@@ -11,6 +11,7 @@ function formatDate(dateString) {
 
 function ProductsPage() {
     const [products, setProducts] = useState([])
+    const [searchTerm, setSearchTerm] = useState('')
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -29,6 +30,16 @@ function ProductsPage() {
         loadProducts()
     }, [])
 
+    const filteredProducts = products.filter((product) => {
+        const search = searchTerm.trim().toLowerCase()
+
+        return (
+            product.name.toLowerCase().includes(search) ||
+            product.shop_name.toLowerCase().includes(search) ||
+            product.category.toLowerCase().includes(search)
+        )
+    })
+
     if (isLoading) {
         return <p>Loading products...</p>
     }
@@ -46,9 +57,23 @@ function ProductsPage() {
                 </div>
             </div>
 
+            <div className="search-bar">
+                <input
+                    type="search"
+                    placeholder="Search products, shops, or categories..."
+                    aria-label="Search products"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                />
+            </div>
+
             <div className="table-card">
                 {products.length === 0 ? (
                     <p className="empty-state">No products available.</p>
+                ) : filteredProducts.length === 0 ? (
+                    <p className="empty-state">
+                        No products match your search.
+                    </p>
                 ) : (
                     <div className="table-wrapper">
                         <table className="products-table">
@@ -62,15 +87,20 @@ function ProductsPage() {
                             </thead>
 
                             <tbody>
-                                {products.map((product) => (
+                                {filteredProducts.map((product) => (
                                     <tr key={product.id}>
-                                        <td className="product-name">{product.name}</td>
+                                        <td className="product-name">
+                                            {product.name}
+                                        </td>
+
                                         <td>{product.shop_name}</td>
+
                                         <td>
                                             <span className="category-badge">
                                                 {product.category}
                                             </span>
                                         </td>
+
                                         <td>{formatDate(product.created_at)}</td>
                                     </tr>
                                 ))}
