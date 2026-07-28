@@ -7,7 +7,9 @@ import {
 
 import AppLayout from './layouts/AppLayout'
 import DashboardPage from './pages/DashboardPage'
+import ImportsPage from './pages/ImportsPage'
 import LoginPage from './pages/LoginPage'
+import ProductsPage from './pages/ProductsPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/imports" element={<ImportsPage />} />
           </Route>
         </Route>
 
