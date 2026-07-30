@@ -14,6 +14,7 @@ function ProductsPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedCategory, setSelectedCategory] = useState('All')
     const [selectedShop, setSelectedShop] = useState('All')
+    const [sortOption, setSortOption] = useState('newest')
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -61,6 +62,28 @@ function ProductsPage() {
         return matchesSearch && matchesCategory && matchesShop
     })
 
+    const sortedProducts = [...filteredProducts].sort((productA, productB) => {
+        if (sortOption === 'oldest') {
+            return (
+                new Date(productA.created_at).getTime() -
+                new Date(productB.created_at).getTime()
+            )
+        }
+
+        if (sortOption === 'name-ascending') {
+            return productA.name.localeCompare(productB.name)
+        }
+
+        if (sortOption === 'name-descending') {
+            return productB.name.localeCompare(productA.name)
+        }
+
+        return (
+            new Date(productB.created_at).getTime() -
+            new Date(productA.created_at).getTime()
+        )
+    })
+
     if (isLoading) {
         return <p>Loading products...</p>
     }
@@ -97,9 +120,7 @@ function ProductsPage() {
                     >
                         {categories.map((category) => (
                             <option key={category} value={category}>
-                                {category === 'All'
-                                    ? 'All categories'
-                                    : category}
+                                {category === 'All' ? 'All categories' : category}
                             </option>
                         ))}
                     </select>
@@ -115,13 +136,24 @@ function ProductsPage() {
                             </option>
                         ))}
                     </select>
+
+                    <select
+                        aria-label="Sort products"
+                        value={sortOption}
+                        onChange={(event) => setSortOption(event.target.value)}
+                    >
+                        <option value="newest">Newest first</option>
+                        <option value="oldest">Oldest first</option>
+                        <option value="name-ascending">Product A–Z</option>
+                        <option value="name-descending">Product Z–A</option>
+                    </select>
                 </div>
             </div>
 
             <div className="table-card">
                 {products.length === 0 ? (
                     <p className="empty-state">No products available.</p>
-                ) : filteredProducts.length === 0 ? (
+                ) : sortedProducts.length === 0 ? (
                     <p className="empty-state">
                         No products match your filters.
                     </p>
@@ -138,7 +170,7 @@ function ProductsPage() {
                             </thead>
 
                             <tbody>
-                                {filteredProducts.map((product) => (
+                                {sortedProducts.map((product) => (
                                     <tr key={product.id}>
                                         <td className="product-name">
                                             {product.name}
