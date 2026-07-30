@@ -13,6 +13,7 @@ function ProductsPage() {
     const [products, setProducts] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedCategory, setSelectedCategory] = useState('All')
+    const [selectedShop, setSelectedShop] = useState('All')
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -36,6 +37,11 @@ function ProductsPage() {
         ...new Set(products.map((product) => product.category)),
     ]
 
+    const shops = [
+        'All',
+        ...new Set(products.map((product) => product.shop_name)),
+    ]
+
     const filteredProducts = products.filter((product) => {
         const search = searchTerm.trim().toLowerCase()
 
@@ -48,7 +54,11 @@ function ProductsPage() {
             selectedCategory === 'All' ||
             product.category === selectedCategory
 
-        return matchesSearch && matchesCategory
+        const matchesShop =
+            selectedShop === 'All' ||
+            product.shop_name === selectedShop
+
+        return matchesSearch && matchesCategory && matchesShop
     })
 
     if (isLoading) {
@@ -73,19 +83,35 @@ function ProductsPage() {
                     <input
                         type="search"
                         placeholder="Search products, shops, or categories..."
+                        aria-label="Search products"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(event) => setSearchTerm(event.target.value)}
                     />
                 </div>
 
                 <div className="filter-group">
                     <select
+                        aria-label="Filter by category"
                         value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        onChange={(event) => setSelectedCategory(event.target.value)}
                     >
                         {categories.map((category) => (
                             <option key={category} value={category}>
-                                {category}
+                                {category === 'All'
+                                    ? 'All categories'
+                                    : category}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        aria-label="Filter by shop"
+                        value={selectedShop}
+                        onChange={(event) => setSelectedShop(event.target.value)}
+                    >
+                        {shops.map((shop) => (
+                            <option key={shop} value={shop}>
+                                {shop === 'All' ? 'All shops' : shop}
                             </option>
                         ))}
                     </select>
