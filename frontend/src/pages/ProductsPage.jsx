@@ -12,6 +12,7 @@ function formatDate(dateString) {
 function ProductsPage() {
     const [products, setProducts] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
+    const [selectedCategory, setSelectedCategory] = useState('All')
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -30,14 +31,24 @@ function ProductsPage() {
         loadProducts()
     }, [])
 
+    const categories = [
+        'All',
+        ...new Set(products.map((product) => product.category)),
+    ]
+
     const filteredProducts = products.filter((product) => {
         const search = searchTerm.trim().toLowerCase()
 
-        return (
+        const matchesSearch =
             product.name.toLowerCase().includes(search) ||
             product.shop_name.toLowerCase().includes(search) ||
             product.category.toLowerCase().includes(search)
-        )
+
+        const matchesCategory =
+            selectedCategory === 'All' ||
+            product.category === selectedCategory
+
+        return matchesSearch && matchesCategory
     })
 
     if (isLoading) {
@@ -57,14 +68,28 @@ function ProductsPage() {
                 </div>
             </div>
 
-            <div className="search-bar">
-                <input
-                    type="search"
-                    placeholder="Search products, shops, or categories..."
-                    aria-label="Search products"
-                    value={searchTerm}
-                    onChange={(event) => setSearchTerm(event.target.value)}
-                />
+            <div className="table-controls">
+                <div className="search-bar">
+                    <input
+                        type="search"
+                        placeholder="Search products, shops, or categories..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+
+                <div className="filter-group">
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                    >
+                        {categories.map((category) => (
+                            <option key={category} value={category}>
+                                {category}
+                            </option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             <div className="table-card">
@@ -72,7 +97,7 @@ function ProductsPage() {
                     <p className="empty-state">No products available.</p>
                 ) : filteredProducts.length === 0 ? (
                     <p className="empty-state">
-                        No products match your search.
+                        No products match your filters.
                     </p>
                 ) : (
                     <div className="table-wrapper">
