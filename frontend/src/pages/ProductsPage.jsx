@@ -100,9 +100,7 @@ function ProductsPage() {
     )
 
     const startItem =
-        sortedProducts.length === 0
-            ? 0
-            : startIndex + 1
+        sortedProducts.length === 0 ? 0 : startIndex + 1
 
     const endItem = Math.min(
         startIndex + itemsPerPage,
@@ -206,8 +204,7 @@ function ProductsPage() {
             </div>
 
             <p className="pagination-info">
-                Showing {startItem}–{endItem} of {sortedProducts.length}{' '}
-                products
+                Showing {startItem}–{endItem} of {sortedProducts.length} products
             </p>
 
             <div className="table-card">
@@ -227,6 +224,7 @@ function ProductsPage() {
                                         <th>Shop</th>
                                         <th>Category</th>
                                         <th>Created</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
 
@@ -246,6 +244,31 @@ function ProductsPage() {
                                             </td>
 
                                             <td>{formatDate(product.created_at)}</td>
+
+                                            <td>
+                                                <div className="action-buttons">
+                                                    <button
+                                                        type="button"
+                                                        className="view-button"
+                                                    >
+                                                        View
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        className="edit-button"
+                                                    >
+                                                        Edit
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        className="delete-button"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
