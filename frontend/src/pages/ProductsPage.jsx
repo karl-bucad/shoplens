@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import ProductDetailsModal from '../components/ProductDetailsModal'
 import { getProducts } from '../api/products'
 
 function formatDate(dateString) {
@@ -16,6 +17,7 @@ function ProductsPage() {
     const [selectedShop, setSelectedShop] = useState('All')
     const [sortOption, setSortOption] = useState('newest')
     const [currentPage, setCurrentPage] = useState(1)
+    const [selectedProduct, setSelectedProduct] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -250,6 +252,7 @@ function ProductsPage() {
                                                     <button
                                                         type="button"
                                                         className="view-button"
+                                                        onClick={() => setSelectedProduct(product)}
                                                     >
                                                         View
                                                     </button>
@@ -299,6 +302,11 @@ function ProductsPage() {
                     </>
                 )}
             </div>
+
+            <ProductDetailsModal
+                product={selectedProduct}
+                onClose={() => setSelectedProduct(null)}
+            />
         </>
     )
 }
