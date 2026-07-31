@@ -132,3 +132,63 @@ def test_unauthenticated_user_cannot_access_products() -> None:
 
     assert create_response.status_code == 401
     assert list_response.status_code == 401
+    
+def test_authenticated_user_can_update_product() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    create_response = client.post(
+        "/products",
+        headers=headers,
+        json={
+            "name": "Original Product",
+            "shop_name": "Original Shop",
+            "category": "Original Category",
+        },
+    )
+
+    assert create_response.status_code == 201
+
+    product_id = create_response.json()["id"]
+
+    update_response = client.put(
+        f"/products/{product_id}",
+        headers=headers,
+        json={
+            "name": "Updated Product",
+            "shop_name": "Updated Shop",
+            "category": "Updated Category",
+        },
+    )
+
+    assert update_response.status_code == 200
+
+    data = update_response.json()
+
+    assert data["id"] == product_id
+    assert data["name"] == "Updated Product"
+    assert data["shop_name"] == "Updated Shop"
+    assert data["category"] == "Updated Category"
+
+    clear_test_data()
+
+
+def test_updating_missing_product_returns_not_found() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+
+    response = client.put(
+        "/products/999999",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "name": "Missing Product",
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Product not found."
+    }
+
+    clear_test_data()
