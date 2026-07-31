@@ -15,8 +15,11 @@ function ProductsPage() {
     const [selectedCategory, setSelectedCategory] = useState('All')
     const [selectedShop, setSelectedShop] = useState('All')
     const [sortOption, setSortOption] = useState('newest')
+    const [currentPage, setCurrentPage] = useState(1)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
+
+    const itemsPerPage = 10
 
     useEffect(() => {
         async function loadProducts() {
@@ -84,6 +87,56 @@ function ProductsPage() {
         )
     })
 
+    const totalPages = Math.max(
+        1,
+        Math.ceil(sortedProducts.length / itemsPerPage)
+    )
+
+    const startIndex = (currentPage - 1) * itemsPerPage
+
+    const currentProducts = sortedProducts.slice(
+        startIndex,
+        startIndex + itemsPerPage
+    )
+
+    const startItem =
+        sortedProducts.length === 0
+            ? 0
+            : startIndex + 1
+
+    const endItem = Math.min(
+        startIndex + itemsPerPage,
+        sortedProducts.length
+    )
+
+    function handleSearchChange(event) {
+        setSearchTerm(event.target.value)
+        setCurrentPage(1)
+    }
+
+    function handleCategoryChange(event) {
+        setSelectedCategory(event.target.value)
+        setCurrentPage(1)
+    }
+
+    function handleShopChange(event) {
+        setSelectedShop(event.target.value)
+        setCurrentPage(1)
+    }
+
+    function handleSortChange(event) {
+        setSortOption(event.target.value)
+        setCurrentPage(1)
+    }
+
+    function goToPreviousPage() {
+        setCurrentPage((page) => Math.max(page - 1, 1))
+    }
+
+    function goToNextPage() {
+        setCurrentPage((page) => Math.min(page + 1, totalPages))
+    }
+
     if (isLoading) {
         return <p>Loading products...</p>
     }
@@ -108,7 +161,7 @@ function ProductsPage() {
                         placeholder="Search products, shops, or categories..."
                         aria-label="Search products"
                         value={searchTerm}
-                        onChange={(event) => setSearchTerm(event.target.value)}
+                        onChange={handleSearchChange}
                     />
                 </div>
 
@@ -116,11 +169,13 @@ function ProductsPage() {
                     <select
                         aria-label="Filter by category"
                         value={selectedCategory}
-                        onChange={(event) => setSelectedCategory(event.target.value)}
+                        onChange={handleCategoryChange}
                     >
                         {categories.map((category) => (
                             <option key={category} value={category}>
-                                {category === 'All' ? 'All categories' : category}
+                                {category === 'All'
+                                    ? 'All categories'
+                                    : category}
                             </option>
                         ))}
                     </select>
@@ -128,7 +183,7 @@ function ProductsPage() {
                     <select
                         aria-label="Filter by shop"
                         value={selectedShop}
-                        onChange={(event) => setSelectedShop(event.target.value)}
+                        onChange={handleShopChange}
                     >
                         {shops.map((shop) => (
                             <option key={shop} value={shop}>
@@ -140,7 +195,7 @@ function ProductsPage() {
                     <select
                         aria-label="Sort products"
                         value={sortOption}
-                        onChange={(event) => setSortOption(event.target.value)}
+                        onChange={handleSortChange}
                     >
                         <option value="newest">Newest first</option>
                         <option value="oldest">Oldest first</option>
@@ -150,6 +205,11 @@ function ProductsPage() {
                 </div>
             </div>
 
+            <p className="pagination-info">
+                Showing {startItem}–{endItem} of {sortedProducts.length}{' '}
+                products
+            </p>
+
             <div className="table-card">
                 {products.length === 0 ? (
                     <p className="empty-state">No products available.</p>
@@ -158,38 +218,62 @@ function ProductsPage() {
                         No products match your filters.
                     </p>
                 ) : (
-                    <div className="table-wrapper">
-                        <table className="products-table">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Shop</th>
-                                    <th>Category</th>
-                                    <th>Created</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {sortedProducts.map((product) => (
-                                    <tr key={product.id}>
-                                        <td className="product-name">
-                                            {product.name}
-                                        </td>
-
-                                        <td>{product.shop_name}</td>
-
-                                        <td>
-                                            <span className="category-badge">
-                                                {product.category}
-                                            </span>
-                                        </td>
-
-                                        <td>{formatDate(product.created_at)}</td>
+                    <>
+                        <div className="table-wrapper">
+                            <table className="products-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Shop</th>
+                                        <th>Category</th>
+                                        <th>Created</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+
+                                <tbody>
+                                    {currentProducts.map((product) => (
+                                        <tr key={product.id}>
+                                            <td className="product-name">
+                                                {product.name}
+                                            </td>
+
+                                            <td>{product.shop_name}</td>
+
+                                            <td>
+                                                <span className="category-badge">
+                                                    {product.category}
+                                                </span>
+                                            </td>
+
+                                            <td>{formatDate(product.created_at)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="pagination">
+                            <button
+                                type="button"
+                                disabled={currentPage === 1}
+                                onClick={goToPreviousPage}
+                            >
+                                Previous
+                            </button>
+
+                            <span>
+                                Page {currentPage} of {totalPages}
+                            </span>
+
+                            <button
+                                type="button"
+                                disabled={currentPage === totalPages}
+                                onClick={goToNextPage}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </>
                 )}
             </div>
         </>
