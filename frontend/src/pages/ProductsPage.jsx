@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
+
+import EditProductModal from '../components/EditProductModal'
 import ProductDetailsModal from '../components/ProductDetailsModal'
 import { getProducts } from '../api/products'
+import { updateProduct } from '../api/updateProduct'
 
 function formatDate(dateString) {
     return new Intl.DateTimeFormat('en-US', {
@@ -17,7 +20,12 @@ function ProductsPage() {
     const [selectedShop, setSelectedShop] = useState('All')
     const [sortOption, setSortOption] = useState('newest')
     const [currentPage, setCurrentPage] = useState(1)
+
     const [selectedProduct, setSelectedProduct] = useState(null)
+    const [editingProduct, setEditingProduct] = useState(null)
+    const [isSaving, setIsSaving] = useState(false)
+    const [saveError, setSaveError] = useState('')
+
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -40,21 +48,32 @@ function ProductsPage() {
 
     const categories = [
         'All',
-        ...new Set(products.map((product) => product.category)),
+        ...new Set(
+            products
+                .map((product) => product.category)
+                .filter(Boolean),
+        ),
     ]
 
     const shops = [
         'All',
-        ...new Set(products.map((product) => product.shop_name)),
+        ...new Set(
+            products
+                .map((product) => product.shop_name)
+                .filter(Boolean),
+        ),
     ]
 
     const filteredProducts = products.filter((product) => {
         const search = searchTerm.trim().toLowerCase()
+        const productName = product.name.toLowerCase()
+        const shopName = (product.shop_name ?? '').toLowerCase()
+        const category = (product.category ?? '').toLowerCase()
 
         const matchesSearch =
-            product.name.toLowerCase().includes(search) ||
-            product.shop_name.toLowerCase().includes(search) ||
-            product.category.toLowerCase().includes(search)
+            productName.includes(search) ||
+            shopName.includes(search) ||
+            category.includes(search)
 
         const matchesCategory =
             selectedCategory === 'All' ||
@@ -67,38 +86,40 @@ function ProductsPage() {
         return matchesSearch && matchesCategory && matchesShop
     })
 
-    const sortedProducts = [...filteredProducts].sort((productA, productB) => {
-        if (sortOption === 'oldest') {
+    const sortedProducts = [...filteredProducts].sort(
+        (productA, productB) => {
+            if (sortOption === 'oldest') {
+                return (
+                    new Date(productA.created_at).getTime() -
+                    new Date(productB.created_at).getTime()
+                )
+            }
+
+            if (sortOption === 'name-ascending') {
+                return productA.name.localeCompare(productB.name)
+            }
+
+            if (sortOption === 'name-descending') {
+                return productB.name.localeCompare(productA.name)
+            }
+
             return (
-                new Date(productA.created_at).getTime() -
-                new Date(productB.created_at).getTime()
+                new Date(productB.created_at).getTime() -
+                new Date(productA.created_at).getTime()
             )
-        }
-
-        if (sortOption === 'name-ascending') {
-            return productA.name.localeCompare(productB.name)
-        }
-
-        if (sortOption === 'name-descending') {
-            return productB.name.localeCompare(productA.name)
-        }
-
-        return (
-            new Date(productB.created_at).getTime() -
-            new Date(productA.created_at).getTime()
-        )
-    })
+        },
+    )
 
     const totalPages = Math.max(
         1,
-        Math.ceil(sortedProducts.length / itemsPerPage)
+        Math.ceil(sortedProducts.length / itemsPerPage),
     )
 
     const startIndex = (currentPage - 1) * itemsPerPage
 
     const currentProducts = sortedProducts.slice(
         startIndex,
-        startIndex + itemsPerPage
+        startIndex + itemsPerPage,
     )
 
     const startItem =
@@ -106,7 +127,7 @@ function ProductsPage() {
 
     const endItem = Math.min(
         startIndex + itemsPerPage,
-        sortedProducts.length
+        sortedProducts.length,
     )
 
     function handleSearchChange(event) {
@@ -135,6 +156,53 @@ function ProductsPage() {
 
     function goToNextPage() {
         setCurrentPage((page) => Math.min(page + 1, totalPages))
+    }
+
+    function openEditModal(product) {
+        setSaveError('')
+        setEditingProduct(product)
+    }
+
+    function closeEditModal() {
+        if (isSaving) {
+            return
+        }
+
+        setEditingProduct(null)
+        setSaveError('')
+    }
+
+    async function handleSaveProduct(updatedProduct) {
+        setIsSaving(true)
+        setSaveError('')
+
+        try {
+            const savedProduct = await updateProduct(updatedProduct)
+
+            setProducts((currentProductsList) =>
+                currentProductsList.map((product) =>
+                    product.id === savedProduct.id
+                        ? savedProduct
+                        : product,
+                ),
+            )
+
+            setSelectedProduct((currentSelectedProduct) =>
+                currentSelectedProduct?.id === savedProduct.id
+                    ? savedProduct
+                    : currentSelectedProduct,
+            )
+
+            setEditingProduct(null)
+        } catch (requestError) {
+            const message =
+                requestError.response?.data?.detail ??
+                'Unable to update product.'
+
+            setSaveError(message)
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     if (isLoading) {
@@ -206,7 +274,8 @@ function ProductsPage() {
             </div>
 
             <p className="pagination-info">
-                Showing {startItem}–{endItem} of {sortedProducts.length} products
+                Showing {startItem}–{endItem} of {sortedProducts.length}{' '}
+                products
             </p>
 
             <div className="table-card">
@@ -237,11 +306,11 @@ function ProductsPage() {
                                                 {product.name}
                                             </td>
 
-                                            <td>{product.shop_name}</td>
+                                            <td>{product.shop_name ?? '—'}</td>
 
                                             <td>
                                                 <span className="category-badge">
-                                                    {product.category}
+                                                    {product.category ?? 'Uncategorized'}
                                                 </span>
                                             </td>
 
@@ -252,7 +321,9 @@ function ProductsPage() {
                                                     <button
                                                         type="button"
                                                         className="view-button"
-                                                        onClick={() => setSelectedProduct(product)}
+                                                        onClick={() =>
+                                                            setSelectedProduct(product)
+                                                        }
                                                     >
                                                         View
                                                     </button>
@@ -260,6 +331,7 @@ function ProductsPage() {
                                                     <button
                                                         type="button"
                                                         className="edit-button"
+                                                        onClick={() => openEditModal(product)}
                                                     >
                                                         Edit
                                                     </button>
@@ -306,6 +378,16 @@ function ProductsPage() {
             <ProductDetailsModal
                 product={selectedProduct}
                 onClose={() => setSelectedProduct(null)}
+            />
+
+            <EditProductModal
+                key={editingProduct?.id ?? 'closed-edit-modal'}
+                product={editingProduct}
+                isOpen={editingProduct !== null}
+                isSaving={isSaving}
+                error={saveError}
+                onClose={closeEditModal}
+                onSave={handleSaveProduct}
             />
         </>
     )
