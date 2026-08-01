@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 
+import DeleteProductModal from '../components/DeleteProductModal'
 import EditProductModal from '../components/EditProductModal'
 import ProductDetailsModal from '../components/ProductDetailsModal'
+import { deleteProduct } from '../api/deleteProduct'
 import { getProducts } from '../api/products'
 import { updateProduct } from '../api/updateProduct'
 
@@ -22,9 +24,14 @@ function ProductsPage() {
     const [currentPage, setCurrentPage] = useState(1)
 
     const [selectedProduct, setSelectedProduct] = useState(null)
+
     const [editingProduct, setEditingProduct] = useState(null)
     const [isSaving, setIsSaving] = useState(false)
     const [saveError, setSaveError] = useState('')
+
+    const [deletingProduct, setDeletingProduct] = useState(null)
+    const [isDeleting, setIsDeleting] = useState(false)
+    const [deleteError, setDeleteError] = useState('')
 
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
@@ -115,7 +122,8 @@ function ProductsPage() {
         Math.ceil(sortedProducts.length / itemsPerPage),
     )
 
-    const startIndex = (currentPage - 1) * itemsPerPage
+    const safeCurrentPage = Math.min(currentPage, totalPages)
+    const startIndex = (safeCurrentPage - 1) * itemsPerPage
 
     const currentProducts = sortedProducts.slice(
         startIndex,
@@ -202,6 +210,57 @@ function ProductsPage() {
             setSaveError(message)
         } finally {
             setIsSaving(false)
+        }
+    }
+
+    function openDeleteModal(product) {
+        setDeleteError('')
+        setDeletingProduct(product)
+    }
+
+    function closeDeleteModal() {
+        if (isDeleting) {
+            return
+        }
+
+        setDeletingProduct(null)
+        setDeleteError('')
+    }
+
+    async function handleDeleteProduct() {
+        if (!deletingProduct) {
+            return
+        }
+
+        setIsDeleting(true)
+        setDeleteError('')
+
+        try {
+            await deleteProduct(deletingProduct.id)
+
+            setProducts((currentProductsList) =>
+                currentProductsList.filter(
+                    (product) => product.id !== deletingProduct.id,
+                ),
+            )
+
+            if (selectedProduct?.id === deletingProduct.id) {
+                setSelectedProduct(null)
+            }
+
+            if (editingProduct?.id === deletingProduct.id) {
+                setEditingProduct(null)
+            }
+
+            setDeletingProduct(null)
+        } catch (requestError) {
+            const message =
+                requestError.response?.data?.detail ??
+                'Unable to delete product.'
+
+            setDeleteError(message)
+        } finally {
+            setIsDeleting(false)
         }
     }
 
@@ -339,6 +398,7 @@ function ProductsPage() {
                                                     <button
                                                         type="button"
                                                         className="delete-button"
+                                                        onClick={() => openDeleteModal(product)}
                                                     >
                                                         Delete
                                                     </button>
@@ -353,19 +413,19 @@ function ProductsPage() {
                         <div className="pagination">
                             <button
                                 type="button"
-                                disabled={currentPage === 1}
+                                disabled={safeCurrentPage === 1}
                                 onClick={goToPreviousPage}
                             >
                                 Previous
                             </button>
 
                             <span>
-                                Page {currentPage} of {totalPages}
+                                Page {safeCurrentPage} of {totalPages}
                             </span>
 
                             <button
                                 type="button"
-                                disabled={currentPage === totalPages}
+                                disabled={safeCurrentPage === totalPages}
                                 onClick={goToNextPage}
                             >
                                 Next
@@ -388,6 +448,15 @@ function ProductsPage() {
                 error={saveError}
                 onClose={closeEditModal}
                 onSave={handleSaveProduct}
+            />
+
+            <DeleteProductModal
+                product={deletingProduct}
+                isOpen={deletingProduct !== null}
+                isDeleting={isDeleting}
+                error={deleteError}
+                onClose={closeDeleteModal}
+                onConfirm={handleDeleteProduct}
             />
         </>
     )
