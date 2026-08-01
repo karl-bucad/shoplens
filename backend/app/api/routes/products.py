@@ -13,6 +13,7 @@ from app.services.product_service import (
     create_product,
     get_products_by_user,
     update_product,
+    delete_product,
 )
 
 
@@ -76,3 +77,24 @@ def update_existing_product(
         )
 
     return product
+
+@router.delete(
+    "/{product_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_existing_product(
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    deleted = delete_product(
+        db=db,
+        user_id=current_user.id,
+        product_id=product_id,
+    )
+
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found.",
+        )

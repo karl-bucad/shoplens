@@ -16,6 +16,7 @@ from app.services.product_service import (
     create_product,
     get_products_by_user,
     update_product,
+    delete_product,
 )
 
 from .import_service import create_import_job

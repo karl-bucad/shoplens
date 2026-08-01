@@ -192,3 +192,59 @@ def test_updating_missing_product_returns_not_found() -> None:
     }
 
     clear_test_data()
+    
+def test_authenticated_user_can_delete_product() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    create_response = client.post(
+        "/products",
+        headers=headers,
+        json={
+            "name": "Delete Test Product",
+            "shop_name": "Test Shop",
+            "category": "Testing",
+        },
+    )
+
+    assert create_response.status_code == 201
+
+    product_id = create_response.json()["id"]
+
+    delete_response = client.delete(
+        f"/products/{product_id}",
+        headers=headers,
+    )
+
+    assert delete_response.status_code == 204
+
+    list_response = client.get(
+        "/products",
+        headers=headers,
+    )
+
+    assert list_response.status_code == 200
+    assert all(
+        product["id"] != product_id
+        for product in list_response.json()
+    )
+
+    clear_test_data()
+
+
+def test_deleting_missing_product_returns_not_found() -> None:
+    clear_test_data()
+    token = register_and_get_token()
+
+    response = client.delete(
+        "/products/999999",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Product not found."
+    }
+
+    clear_test_data()

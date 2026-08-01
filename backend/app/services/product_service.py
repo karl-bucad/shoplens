@@ -62,3 +62,23 @@ def update_product(
     db.refresh(product)
 
     return product
+
+def delete_product(
+    db: Session,
+    user_id: int,
+    product_id: int,
+) -> bool:
+    statement = select(Product).where(
+        Product.id == product_id,
+        Product.user_id == user_id,
+    )
+
+    product = db.scalar(statement)
+
+    if product is None:
+        return False
+
+    db.delete(product)
+    db.commit()
+
+    return True
