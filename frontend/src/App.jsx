@@ -4,6 +4,7 @@ import {
   Route,
   Routes,
 } from 'react-router-dom'
+import { Toaster } from 'sonner'
 
 import AppLayout from './layouts/AppLayout'
 import DashboardPage from './pages/DashboardPage'
@@ -15,6 +16,18 @@ import ProtectedRoute from './routes/ProtectedRoute'
 function App() {
   return (
     <BrowserRouter>
+      <Toaster
+        position="top-right"
+        richColors
+        closeButton
+        duration={3500}
+        toastOptions={{
+          style: {
+            borderRadius: '12px',
+          },
+        }}
+      />
+
       <Routes>
         <Route path="/login" element={<LoginPage />} />
 

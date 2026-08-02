@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import DeleteProductModal from '../components/DeleteProductModal'
 import EditProductModal from '../components/EditProductModal'
@@ -27,11 +28,9 @@ function ProductsPage() {
 
     const [editingProduct, setEditingProduct] = useState(null)
     const [isSaving, setIsSaving] = useState(false)
-    const [saveError, setSaveError] = useState('')
 
     const [deletingProduct, setDeletingProduct] = useState(null)
     const [isDeleting, setIsDeleting] = useState(false)
-    const [deleteError, setDeleteError] = useState('')
 
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
@@ -167,22 +166,17 @@ function ProductsPage() {
     }
 
     function openEditModal(product) {
-        setSaveError('')
         setEditingProduct(product)
     }
 
     function closeEditModal() {
-        if (isSaving) {
-            return
+        if (!isSaving) {
+            setEditingProduct(null)
         }
-
-        setEditingProduct(null)
-        setSaveError('')
     }
 
     async function handleSaveProduct(updatedProduct) {
         setIsSaving(true)
-        setSaveError('')
 
         try {
             const savedProduct = await updateProduct(updatedProduct)
@@ -202,29 +196,31 @@ function ProductsPage() {
             )
 
             setEditingProduct(null)
+
+            toast.success('Product updated', {
+                description: `${savedProduct.name} was updated successfully.`,
+            })
         } catch (requestError) {
             const message =
                 requestError.response?.data?.detail ??
                 'Unable to update product.'
 
-            setSaveError(message)
+            toast.error('Update failed', {
+                description: message,
+            })
         } finally {
             setIsSaving(false)
         }
     }
 
     function openDeleteModal(product) {
-        setDeleteError('')
         setDeletingProduct(product)
     }
 
     function closeDeleteModal() {
-        if (isDeleting) {
-            return
+        if (!isDeleting) {
+            setDeletingProduct(null)
         }
-
-        setDeletingProduct(null)
-        setDeleteError('')
     }
 
     async function handleDeleteProduct() {
@@ -233,10 +229,11 @@ function ProductsPage() {
         }
 
         setIsDeleting(true)
-        setDeleteError('')
 
         try {
             await deleteProduct(deletingProduct.id)
+
+            const deletedProductName = deletingProduct.name
 
             setProducts((currentProductsList) =>
                 currentProductsList.filter(
@@ -253,12 +250,18 @@ function ProductsPage() {
             }
 
             setDeletingProduct(null)
+
+            toast.success('Product deleted', {
+                description: `${deletedProductName} was removed successfully.`,
+            })
         } catch (requestError) {
             const message =
                 requestError.response?.data?.detail ??
                 'Unable to delete product.'
 
-            setDeleteError(message)
+            toast.error('Delete failed', {
+                description: message,
+            })
         } finally {
             setIsDeleting(false)
         }
@@ -445,7 +448,7 @@ function ProductsPage() {
                 product={editingProduct}
                 isOpen={editingProduct !== null}
                 isSaving={isSaving}
-                error={saveError}
+                error=""
                 onClose={closeEditModal}
                 onSave={handleSaveProduct}
             />
@@ -454,7 +457,7 @@ function ProductsPage() {
                 product={deletingProduct}
                 isOpen={deletingProduct !== null}
                 isDeleting={isDeleting}
-                error={deleteError}
+                error=""
                 onClose={closeDeleteModal}
                 onConfirm={handleDeleteProduct}
             />
