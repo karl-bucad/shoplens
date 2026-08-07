@@ -495,3 +495,75 @@ button {
   cursor: not-allowed;
   opacity: 0.65;
 }
+
+.upload-card {
+  max-width: 760px;
+  padding: 24px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.upload-form {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.upload-form input[type='file'] {
+  flex: 1;
+  min-width: 240px;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.upload-form button {
+  border: none;
+  border-radius: 8px;
+  padding: 11px 18px;
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+}
+
+.upload-form button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.upload-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.selected-file {
+  margin: 14px 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.status-badge {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-completed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-failed {
+  background: #fee2e2;
+  color: #dc2626;
+}
