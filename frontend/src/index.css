@@ -567,3 +567,73 @@ button {
   background: #fee2e2;
   color: #dc2626;
 }
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #e2e8f0;
+  border-radius: 6px;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.65),
+    transparent
+  );
+  animation: skeleton-shimmer 1.4s infinite;
+}
+
+.skeleton-text {
+  width: 100px;
+  height: 16px;
+}
+
+.skeleton-long {
+  width: 170px;
+}
+
+.skeleton-pill {
+  width: 80px;
+  height: 28px;
+  border-radius: 999px;
+}
+
+.skeleton-button {
+  width: 120px;
+  height: 30px;
+}
+
+.error-state {
+  padding: 32px;
+  background: white;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+}
+
+.error-state h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.error-state p {
+  margin: 0;
+  color: #64748b;
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}

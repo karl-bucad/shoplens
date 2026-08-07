@@ -7,6 +7,7 @@ import ProductDetailsModal from '../components/ProductDetailsModal'
 import ProductFilters from '../components/ProductFilters'
 import ProductsPagination from '../components/ProductsPagination'
 import ProductsTable from '../components/ProductsTable'
+import TableSkeleton from '../components/TableSkeleton'
 
 import { deleteProduct } from '../api/deleteProduct'
 import { getProducts } from '../api/products'
@@ -58,12 +59,20 @@ function ProductsPage() {
 
     const categories = [
         'All',
-        ...new Set(products.map((product) => product.category).filter(Boolean)),
+        ...new Set(
+            products
+                .map((product) => product.category)
+                .filter(Boolean),
+        ),
     ]
 
     const shops = [
         'All',
-        ...new Set(products.map((product) => product.shop_name).filter(Boolean)),
+        ...new Set(
+            products
+                .map((product) => product.shop_name)
+                .filter(Boolean),
+        ),
     ]
 
     const filteredProducts = products.filter((product) => {
@@ -196,7 +205,9 @@ function ProductsPage() {
     }
 
     async function handleDeleteProduct() {
-        if (!deletingProduct) return
+        if (!deletingProduct) {
+            return
+        }
 
         setIsDeleting(true)
 
@@ -231,10 +242,6 @@ function ProductsPage() {
         }
     }
 
-    if (isLoading) return <p>Loading products...</p>
-
-    if (error) return <p>{error}</p>
-
     return (
         <>
             <div className="page-header">
@@ -244,58 +251,71 @@ function ProductsPage() {
                 </div>
             </div>
 
-            <ProductFilters
-                searchTerm={searchTerm}
-                selectedCategory={selectedCategory}
-                selectedShop={selectedShop}
-                sortOption={sortOption}
-                categories={categories}
-                shops={shops}
-                onSearchChange={handleSearchChange}
-                onCategoryChange={handleCategoryChange}
-                onShopChange={handleShopChange}
-                onSortChange={handleSortChange}
-            />
+            {isLoading ? (
+                <div className="table-card">
+                    <TableSkeleton rows={8} />
+                </div>
+            ) : error ? (
+                <div className="error-state">
+                    <h2>Unable to load products</h2>
+                    <p>{error}</p>
+                </div>
+            ) : (
+                <>
+                    <ProductFilters
+                        searchTerm={searchTerm}
+                        selectedCategory={selectedCategory}
+                        selectedShop={selectedShop}
+                        sortOption={sortOption}
+                        categories={categories}
+                        shops={shops}
+                        onSearchChange={handleSearchChange}
+                        onCategoryChange={handleCategoryChange}
+                        onShopChange={handleShopChange}
+                        onSortChange={handleSortChange}
+                    />
 
-            <p className="pagination-info">
-                Showing {startItem}–{endItem} of {sortedProducts.length}{' '}
-                products
-            </p>
-
-            <div className="table-card">
-                {products.length === 0 ? (
-                    <p className="empty-state">No products available.</p>
-                ) : sortedProducts.length === 0 ? (
-                    <p className="empty-state">
-                        No products match your filters.
+                    <p className="pagination-info">
+                        Showing {startItem}–{endItem} of {sortedProducts.length}{' '}
+                        products
                     </p>
-                ) : (
-                    <>
-                        <ProductsTable
-                            products={currentProducts}
-                            formatDate={formatDate}
-                            onView={setSelectedProduct}
-                            onEdit={openEditModal}
-                            onDelete={openDeleteModal}
-                        />
 
-                        <ProductsPagination
-                            currentPage={safeCurrentPage}
-                            totalPages={totalPages}
-                            onPrevious={() =>
-                                setCurrentPage((page) =>
-                                    Math.max(page - 1, 1),
-                                )
-                            }
-                            onNext={() =>
-                                setCurrentPage((page) =>
-                                    Math.min(page + 1, totalPages),
-                                )
-                            }
-                        />
-                    </>
-                )}
-            </div>
+                    <div className="table-card">
+                        {products.length === 0 ? (
+                            <p className="empty-state">No products available.</p>
+                        ) : sortedProducts.length === 0 ? (
+                            <p className="empty-state">
+                                No products match your filters.
+                            </p>
+                        ) : (
+                            <>
+                                <ProductsTable
+                                    products={currentProducts}
+                                    formatDate={formatDate}
+                                    onView={setSelectedProduct}
+                                    onEdit={openEditModal}
+                                    onDelete={openDeleteModal}
+                                />
+
+                                <ProductsPagination
+                                    currentPage={safeCurrentPage}
+                                    totalPages={totalPages}
+                                    onPrevious={() =>
+                                        setCurrentPage((page) =>
+                                            Math.max(page - 1, 1),
+                                        )
+                                    }
+                                    onNext={() =>
+                                        setCurrentPage((page) =>
+                                            Math.min(page + 1, totalPages),
+                                        )
+                                    }
+                                />
+                            </>
+                        )}
+                    </div>
+                </>
+            )}
 
             <ProductDetailsModal
                 product={selectedProduct}
