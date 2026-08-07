@@ -4,6 +4,10 @@ import { toast } from 'sonner'
 import DeleteProductModal from '../components/DeleteProductModal'
 import EditProductModal from '../components/EditProductModal'
 import ProductDetailsModal from '../components/ProductDetailsModal'
+import ProductFilters from '../components/ProductFilters'
+import ProductsPagination from '../components/ProductsPagination'
+import ProductsTable from '../components/ProductsTable'
+
 import { deleteProduct } from '../api/deleteProduct'
 import { getProducts } from '../api/products'
 import { updateProduct } from '../api/updateProduct'
@@ -54,32 +58,21 @@ function ProductsPage() {
 
     const categories = [
         'All',
-        ...new Set(
-            products
-                .map((product) => product.category)
-                .filter(Boolean),
-        ),
+        ...new Set(products.map((product) => product.category).filter(Boolean)),
     ]
 
     const shops = [
         'All',
-        ...new Set(
-            products
-                .map((product) => product.shop_name)
-                .filter(Boolean),
-        ),
+        ...new Set(products.map((product) => product.shop_name).filter(Boolean)),
     ]
 
     const filteredProducts = products.filter((product) => {
         const search = searchTerm.trim().toLowerCase()
-        const productName = product.name.toLowerCase()
-        const shopName = (product.shop_name ?? '').toLowerCase()
-        const category = (product.category ?? '').toLowerCase()
 
         const matchesSearch =
-            productName.includes(search) ||
-            shopName.includes(search) ||
-            category.includes(search)
+            product.name.toLowerCase().includes(search) ||
+            (product.shop_name ?? '').toLowerCase().includes(search) ||
+            (product.category ?? '').toLowerCase().includes(search)
 
         const matchesCategory =
             selectedCategory === 'All' ||
@@ -92,29 +85,27 @@ function ProductsPage() {
         return matchesSearch && matchesCategory && matchesShop
     })
 
-    const sortedProducts = [...filteredProducts].sort(
-        (productA, productB) => {
-            if (sortOption === 'oldest') {
-                return (
-                    new Date(productA.created_at).getTime() -
-                    new Date(productB.created_at).getTime()
-                )
-            }
-
-            if (sortOption === 'name-ascending') {
-                return productA.name.localeCompare(productB.name)
-            }
-
-            if (sortOption === 'name-descending') {
-                return productB.name.localeCompare(productA.name)
-            }
-
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+        if (sortOption === 'oldest') {
             return (
-                new Date(productB.created_at).getTime() -
-                new Date(productA.created_at).getTime()
+                new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime()
             )
-        },
-    )
+        }
+
+        if (sortOption === 'name-ascending') {
+            return a.name.localeCompare(b.name)
+        }
+
+        if (sortOption === 'name-descending') {
+            return b.name.localeCompare(a.name)
+        }
+
+        return (
+            new Date(b.created_at).getTime() -
+            new Date(a.created_at).getTime()
+        )
+    })
 
     const totalPages = Math.max(
         1,
@@ -122,6 +113,7 @@ function ProductsPage() {
     )
 
     const safeCurrentPage = Math.min(currentPage, totalPages)
+
     const startIndex = (safeCurrentPage - 1) * itemsPerPage
 
     const currentProducts = sortedProducts.slice(
@@ -137,42 +129,36 @@ function ProductsPage() {
         sortedProducts.length,
     )
 
+    function resetToFirstPage() {
+        setCurrentPage(1)
+    }
+
     function handleSearchChange(event) {
         setSearchTerm(event.target.value)
-        setCurrentPage(1)
+        resetToFirstPage()
     }
 
     function handleCategoryChange(event) {
         setSelectedCategory(event.target.value)
-        setCurrentPage(1)
+        resetToFirstPage()
     }
 
     function handleShopChange(event) {
         setSelectedShop(event.target.value)
-        setCurrentPage(1)
+        resetToFirstPage()
     }
 
     function handleSortChange(event) {
         setSortOption(event.target.value)
-        setCurrentPage(1)
-    }
-
-    function goToPreviousPage() {
-        setCurrentPage((page) => Math.max(page - 1, 1))
-    }
-
-    function goToNextPage() {
-        setCurrentPage((page) => Math.min(page + 1, totalPages))
+        resetToFirstPage()
     }
 
     function openEditModal(product) {
         setEditingProduct(product)
     }
 
-    function closeEditModal() {
-        if (!isSaving) {
-            setEditingProduct(null)
-        }
+    function openDeleteModal(product) {
+        setDeletingProduct(product)
     }
 
     async function handleSaveProduct(updatedProduct) {
@@ -181,62 +167,46 @@ function ProductsPage() {
         try {
             const savedProduct = await updateProduct(updatedProduct)
 
-            setProducts((currentProductsList) =>
-                currentProductsList.map((product) =>
+            setProducts((current) =>
+                current.map((product) =>
                     product.id === savedProduct.id
                         ? savedProduct
                         : product,
                 ),
             )
 
-            setSelectedProduct((currentSelectedProduct) =>
-                currentSelectedProduct?.id === savedProduct.id
-                    ? savedProduct
-                    : currentSelectedProduct,
-            )
+            if (selectedProduct?.id === savedProduct.id) {
+                setSelectedProduct(savedProduct)
+            }
 
             setEditingProduct(null)
 
             toast.success('Product updated', {
                 description: `${savedProduct.name} was updated successfully.`,
             })
-        } catch (requestError) {
-            const message =
-                requestError.response?.data?.detail ??
-                'Unable to update product.'
-
+        } catch (error) {
             toast.error('Update failed', {
-                description: message,
+                description:
+                    error.response?.data?.detail ??
+                    'Unable to update product.',
             })
         } finally {
             setIsSaving(false)
         }
     }
 
-    function openDeleteModal(product) {
-        setDeletingProduct(product)
-    }
-
-    function closeDeleteModal() {
-        if (!isDeleting) {
-            setDeletingProduct(null)
-        }
-    }
-
     async function handleDeleteProduct() {
-        if (!deletingProduct) {
-            return
-        }
+        if (!deletingProduct) return
 
         setIsDeleting(true)
 
         try {
             await deleteProduct(deletingProduct.id)
 
-            const deletedProductName = deletingProduct.name
+            const deletedName = deletingProduct.name
 
-            setProducts((currentProductsList) =>
-                currentProductsList.filter(
+            setProducts((current) =>
+                current.filter(
                     (product) => product.id !== deletingProduct.id,
                 ),
             )
@@ -245,35 +215,25 @@ function ProductsPage() {
                 setSelectedProduct(null)
             }
 
-            if (editingProduct?.id === deletingProduct.id) {
-                setEditingProduct(null)
-            }
-
             setDeletingProduct(null)
 
             toast.success('Product deleted', {
-                description: `${deletedProductName} was removed successfully.`,
+                description: `${deletedName} was removed successfully.`,
             })
-        } catch (requestError) {
-            const message =
-                requestError.response?.data?.detail ??
-                'Unable to delete product.'
-
+        } catch (error) {
             toast.error('Delete failed', {
-                description: message,
+                description:
+                    error.response?.data?.detail ??
+                    'Unable to delete product.',
             })
         } finally {
             setIsDeleting(false)
         }
     }
 
-    if (isLoading) {
-        return <p>Loading products...</p>
-    }
+    if (isLoading) return <p>Loading products...</p>
 
-    if (error) {
-        return <p>{error}</p>
-    }
+    if (error) return <p>{error}</p>
 
     return (
         <>
@@ -284,56 +244,18 @@ function ProductsPage() {
                 </div>
             </div>
 
-            <div className="table-controls">
-                <div className="search-bar">
-                    <input
-                        type="search"
-                        placeholder="Search products, shops, or categories..."
-                        aria-label="Search products"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                    />
-                </div>
-
-                <div className="filter-group">
-                    <select
-                        aria-label="Filter by category"
-                        value={selectedCategory}
-                        onChange={handleCategoryChange}
-                    >
-                        {categories.map((category) => (
-                            <option key={category} value={category}>
-                                {category === 'All'
-                                    ? 'All categories'
-                                    : category}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        aria-label="Filter by shop"
-                        value={selectedShop}
-                        onChange={handleShopChange}
-                    >
-                        {shops.map((shop) => (
-                            <option key={shop} value={shop}>
-                                {shop === 'All' ? 'All shops' : shop}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        aria-label="Sort products"
-                        value={sortOption}
-                        onChange={handleSortChange}
-                    >
-                        <option value="newest">Newest first</option>
-                        <option value="oldest">Oldest first</option>
-                        <option value="name-ascending">Product A–Z</option>
-                        <option value="name-descending">Product Z–A</option>
-                    </select>
-                </div>
-            </div>
+            <ProductFilters
+                searchTerm={searchTerm}
+                selectedCategory={selectedCategory}
+                selectedShop={selectedShop}
+                sortOption={sortOption}
+                categories={categories}
+                shops={shops}
+                onSearchChange={handleSearchChange}
+                onCategoryChange={handleCategoryChange}
+                onShopChange={handleShopChange}
+                onSortChange={handleSortChange}
+            />
 
             <p className="pagination-info">
                 Showing {startItem}–{endItem} of {sortedProducts.length}{' '}
@@ -349,91 +271,28 @@ function ProductsPage() {
                     </p>
                 ) : (
                     <>
-                        <div className="table-wrapper">
-                            <table className="products-table">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Shop</th>
-                                        <th>Category</th>
-                                        <th>Created</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
+                        <ProductsTable
+                            products={currentProducts}
+                            formatDate={formatDate}
+                            onView={setSelectedProduct}
+                            onEdit={openEditModal}
+                            onDelete={openDeleteModal}
+                        />
 
-                                <tbody>
-                                    {currentProducts.map((product) => (
-                                        <tr key={product.id}>
-                                            <td className="product-name">
-                                                {product.name}
-                                            </td>
-
-                                            <td>{product.shop_name ?? '—'}</td>
-
-                                            <td>
-                                                <span className="category-badge">
-                                                    {product.category ?? 'Uncategorized'}
-                                                </span>
-                                            </td>
-
-                                            <td>{formatDate(product.created_at)}</td>
-
-                                            <td>
-                                                <div className="action-buttons">
-                                                    <button
-                                                        type="button"
-                                                        className="view-button"
-                                                        onClick={() =>
-                                                            setSelectedProduct(product)
-                                                        }
-                                                    >
-                                                        View
-                                                    </button>
-
-                                                    <button
-                                                        type="button"
-                                                        className="edit-button"
-                                                        onClick={() => openEditModal(product)}
-                                                    >
-                                                        Edit
-                                                    </button>
-
-                                                    <button
-                                                        type="button"
-                                                        className="delete-button"
-                                                        onClick={() => openDeleteModal(product)}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className="pagination">
-                            <button
-                                type="button"
-                                disabled={safeCurrentPage === 1}
-                                onClick={goToPreviousPage}
-                            >
-                                Previous
-                            </button>
-
-                            <span>
-                                Page {safeCurrentPage} of {totalPages}
-                            </span>
-
-                            <button
-                                type="button"
-                                disabled={safeCurrentPage === totalPages}
-                                onClick={goToNextPage}
-                            >
-                                Next
-                            </button>
-                        </div>
+                        <ProductsPagination
+                            currentPage={safeCurrentPage}
+                            totalPages={totalPages}
+                            onPrevious={() =>
+                                setCurrentPage((page) =>
+                                    Math.max(page - 1, 1),
+                                )
+                            }
+                            onNext={() =>
+                                setCurrentPage((page) =>
+                                    Math.min(page + 1, totalPages),
+                                )
+                            }
+                        />
                     </>
                 )}
             </div>
@@ -444,12 +303,12 @@ function ProductsPage() {
             />
 
             <EditProductModal
-                key={editingProduct?.id ?? 'closed-edit-modal'}
+                key={editingProduct?.id ?? 'closed'}
                 product={editingProduct}
                 isOpen={editingProduct !== null}
                 isSaving={isSaving}
                 error=""
-                onClose={closeEditModal}
+                onClose={() => setEditingProduct(null)}
                 onSave={handleSaveProduct}
             />
 
@@ -458,7 +317,7 @@ function ProductsPage() {
                 isOpen={deletingProduct !== null}
                 isDeleting={isDeleting}
                 error=""
-                onClose={closeDeleteModal}
+                onClose={() => setDeletingProduct(null)}
                 onConfirm={handleDeleteProduct}
             />
         </>
