@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import CsvPreviewCard from '../components/imports/CsvPreviewCard'
+
 import {
     getImportJobs,
     uploadProductCsv,
 } from '../api/imports'
+
+import useImportWizard from '../hooks/useImportWizard'
 
 function formatDate(dateString) {
     if (!dateString) {
@@ -34,10 +38,26 @@ function getStatusLabel(status) {
 
 function ImportsPage() {
     const [importJobs, setImportJobs] = useState([])
-    const [selectedFile, setSelectedFile] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isUploading, setIsUploading] = useState(false)
     const [error, setError] = useState('')
+
+    const {
+        selectedFile,
+        rows,
+        issues,
+        handleFileChange,
+        clearSelection,
+    } = useImportWizard()
+
+    const validationErrors = issues.filter(
+        (issue) => issue.type === 'error',
+    )
+
+    const canImport =
+        selectedFile !== null &&
+        rows.length > 0 &&
+        validationErrors.length === 0
 
     useEffect(() => {
         async function loadImportJobs() {
@@ -54,17 +74,28 @@ function ImportsPage() {
         loadImportJobs()
     }, [])
 
-    function handleFileChange(event) {
-        const file = event.target.files?.[0] ?? null
-        setSelectedFile(file)
-    }
-
     async function handleUpload(event) {
         event.preventDefault()
 
         if (!selectedFile) {
             toast.error('No file selected', {
-                description: 'Choose a CSV file before uploading.',
+                description: 'Choose a CSV file before importing.',
+            })
+            return
+        }
+
+        if (validationErrors.length > 0) {
+            toast.error('CSV validation failed', {
+                description:
+                    'Fix the validation errors before importing this file.',
+            })
+            return
+        }
+
+        if (rows.length === 0) {
+            toast.error('CSV is empty', {
+                description:
+                    'Choose a CSV file containing at least one product row.',
             })
             return
         }
@@ -91,7 +122,7 @@ function ImportsPage() {
                 ...currentJobs,
             ])
 
-            setSelectedFile(null)
+            clearSelection()
             event.target.reset()
 
             toast.success('CSV imported', {
@@ -115,25 +146,49 @@ function ImportsPage() {
     }
 
     if (error) {
-        return <p>{error}</p>
+        return (
+            <div className="error-state">
+                <h2>Unable to load imports</h2>
+                <p>{error}</p>
+            </div>
+        )
     }
 
     return (
         <>
             <div className="page-header">
                 <div>
+                    <p className="page-eyebrow">
+                        Market Snapshots
+                    </p>
+
                     <h1>Imports</h1>
-                    <p>Upload CSV files and review previous import jobs.</p>
+
+                    <p>
+                        Review and validate CSV market data before importing it
+                        into ShopLens.
+                    </p>
                 </div>
             </div>
 
             <section className="upload-card">
                 <div className="section-header">
-                    <h2>Upload Product CSV</h2>
-                    <p>Select a CSV file containing product data.</p>
+                    <p className="page-eyebrow">
+                        Step 1
+                    </p>
+
+                    <h2>Choose Product CSV</h2>
+
+                    <p>
+                        Select a CSV containing product name, shop, and category
+                        data.
+                    </p>
                 </div>
 
-                <form className="upload-form" onSubmit={handleUpload}>
+                <form
+                    className="upload-form"
+                    onSubmit={handleUpload}
+                >
                     <input
                         type="file"
                         accept=".csv,text/csv"
@@ -142,9 +197,13 @@ function ImportsPage() {
 
                     <button
                         type="submit"
-                        disabled={isUploading}
+                        disabled={!canImport || isUploading}
                     >
-                        {isUploading ? 'Uploading...' : 'Upload CSV'}
+                        {isUploading
+                            ? 'Importing...'
+                            : selectedFile
+                                ? 'Import Reviewed CSV'
+                                : 'Choose CSV First'}
                     </button>
                 </form>
 
@@ -155,10 +214,24 @@ function ImportsPage() {
                 )}
             </section>
 
+            <CsvPreviewCard
+                file={selectedFile}
+                rows={rows}
+                issues={issues}
+            />
+
             <section className="analytics-section">
                 <div className="section-header">
+                    <p className="page-eyebrow">
+                        History
+                    </p>
+
                     <h2>Import History</h2>
-                    <p>Review past uploads and their results.</p>
+
+                    <p>
+                        Review previous market snapshot uploads and their
+                        results.
+                    </p>
                 </div>
 
                 <div className="table-card">
