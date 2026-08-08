@@ -104,19 +104,6 @@ function DashboardPage() {
         })
     }, [overview, rankedCategories])
 
-    const chartProducts = useMemo(
-        () =>
-            rankedCategories.flatMap((category) =>
-                Array.from(
-                    { length: category.product_count },
-                    () => ({
-                        category: category.category,
-                    }),
-                ),
-            ),
-        [rankedCategories],
-    )
-
     if (isLoading) {
         return <p>Loading market overview...</p>
     }
@@ -238,7 +225,7 @@ function DashboardPage() {
                 </div>
 
                 <CategoryDistributionChart
-                    products={chartProducts}
+                    categories={rankedCategories}
                 />
             </section>
 

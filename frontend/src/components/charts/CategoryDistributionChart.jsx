@@ -8,21 +8,11 @@ import {
     YAxis,
 } from 'recharts'
 
-function CategoryDistributionChart({ products }) {
-    const categoryCounts = products.reduce((counts, product) => {
-        const category = product.category ?? 'Unknown'
-
-        counts[category] = (counts[category] ?? 0) + 1
-
-        return counts
-    }, {})
-
-    const data = Object.entries(categoryCounts)
-        .map(([category, count]) => ({
-            category,
-            count,
-        }))
-        .sort((a, b) => b.count - a.count)
+function CategoryDistributionChart({ categories }) {
+    const data = categories.map((category) => ({
+        category: category.category,
+        count: category.product_count,
+    }))
 
     return (
         <div className="chart-card">
@@ -48,7 +38,7 @@ function CategoryDistributionChart({ products }) {
 
                     <Bar
                         dataKey="count"
-                        fill="#25F4EE"
+                        fill="var(--color-primary)"
                         radius={[8, 8, 0, 0]}
                     />
                 </BarChart>
