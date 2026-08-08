@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import CategoryDistributionChart from '../components/charts/CategoryDistributionChart'
 import ShopDistributionChart from '../components/charts/ShopDistributionChart'
 import ExecutiveSummary from '../components/dashboard/ExecutiveSummary'
+import KpiCard from '../components/dashboard/KpiCard'
 import InsightCard from '../components/InsightCard'
 
 import {
@@ -155,28 +156,38 @@ function DashboardPage() {
                     </p>
                 </div>
 
-                <div className="market-snapshot-grid">
-                    <div className="market-metric">
-                        <span>Tracked Products</span>
-                        <strong>{overview.total_products}</strong>
-                    </div>
+                <div className="kpi-grid">
+                    <KpiCard
+                        label="Tracked Products"
+                        value={overview.total_products}
+                        subtitle="Products in the latest snapshot"
+                        icon="◎"
+                    />
 
-                    <div className="market-metric">
-                        <span>Active Shops</span>
-                        <strong>{overview.total_shops}</strong>
-                    </div>
+                    <KpiCard
+                        label="Active Shops"
+                        value={overview.total_shops}
+                        subtitle="Shops represented in the market"
+                        icon="◫"
+                    />
 
-                    <div className="market-metric">
-                        <span>Categories</span>
-                        <strong>{overview.total_categories}</strong>
-                    </div>
+                    <KpiCard
+                        label="Categories"
+                        value={overview.total_categories}
+                        subtitle="Unique tracked categories"
+                        icon="◈"
+                    />
 
-                    <div className="market-metric">
-                        <span>Largest Shop</span>
-                        <strong>
-                            {rankedShops[0]?.shop_name ?? '—'}
-                        </strong>
-                    </div>
+                    <KpiCard
+                        label="Largest Shop"
+                        value={rankedShops[0]?.shop_name ?? '—'}
+                        subtitle={
+                            rankedShops[0]
+                                ? `${rankedShops[0].product_count} tracked products`
+                                : 'No shop data available'
+                        }
+                        icon="◇"
+                    />
                 </div>
             </section>
 
