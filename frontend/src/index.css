@@ -10,8 +10,8 @@ body,
   font-family:
     Inter, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--color-background);
+  color: var(--color-text);
 }
 
 a {
@@ -113,11 +113,11 @@ button {
 }
 
 .overview-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
 }
 
 .overview-card p {
@@ -180,11 +180,11 @@ button {
 
 .category-card {
   max-width: 760px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
 }
 
 .category-list {
@@ -228,11 +228,11 @@ button {
 }
 
 .table-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 .table-wrapper {
@@ -455,11 +455,15 @@ button {
 
 .close-button {
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 10px 18px;
-  background: #2563eb;
-  color: white;
+  background: var(--color-text);
+  color: var(--color-surface);
   font-weight: 600;
+}
+
+.close-button:hover {
+  opacity: 0.9;
 }
 
 .close-button:hover {
@@ -709,7 +713,7 @@ button {
 
 .page-eyebrow {
   margin: 0 0 8px;
-  color: #2563eb;
+  color: var(--color-primary);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -842,9 +846,9 @@ button {
 }
 
 .research-panel {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -966,9 +970,9 @@ button {
   grid-template-columns: 56px minmax(0, 1fr);
   gap: 18px;
   padding: 22px;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
   transition:
     transform 180ms ease,
     border-color 180ms ease,
@@ -1109,17 +1113,23 @@ button {
 .discovery-score-bar {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #25f4ee, #fe2c55);
+  background: linear-gradient(90deg,
+      var(--color-primary),
+      var(--color-secondary));
 }
 
 .analyze-button {
   padding: 9px 13px;
-  border: 1px solid #dbe2ea;
-  border-radius: 9px;
-  background: white;
-  color: #0f172a;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
   font-size: 0.85rem;
   font-weight: 700;
+}
+
+.analyze-button:hover {
+  border-color: var(--color-primary);
 }
 
 .analyze-button:hover {
@@ -1245,16 +1255,16 @@ button {
   margin-top: 18px;
   overflow: hidden;
   border-radius: 999px;
-  background: #e2e8f0;
+  background: var(--color-border);
 }
 
 .score-progress {
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg,
-      #25f4ee,
-      #8b5cf6,
-      #fe2c55);
+      var(--color-primary),
+      var(--color-accent),
+      var(--color-secondary));
 }
 
 .score-meta {
@@ -1371,13 +1381,18 @@ button {
   width: 36px;
   height: 36px;
   flex: 0 0 36px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  background: white;
-  color: #64748b;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   cursor: pointer;
   font-size: 1.3rem;
   line-height: 1;
+}
+
+.intelligence-close:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text);
 }
 
 .intelligence-close:hover {
@@ -1394,9 +1409,9 @@ button {
 
 .product-intelligence-meta div {
   padding: 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
 }
 
 .product-intelligence-meta span {
@@ -1466,9 +1481,9 @@ button {
   grid-template-columns: 54px minmax(0, 1fr);
   gap: 14px;
   padding: 14px;
-  border: 1px solid #f1f5f9;
-  border-radius: 12px;
-  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
 }
 
 .score-factor-points {
@@ -1478,11 +1493,9 @@ button {
   height: 38px;
   border-radius: 10px;
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       rgba(37, 244, 238, 0.16),
-      rgba(254, 44, 85, 0.1)
-    );
+      rgba(254, 44, 85, 0.1));
   color: #0f172a;
   font-size: 0.85rem;
   font-weight: 800;
@@ -1501,23 +1514,24 @@ button {
 }
 
 .score-total {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-top: 22px;
-  padding: 16px;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 16px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .score-total span {
-  color: #64748b;
-  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .score-total strong {
-  color: #0f172a;
-  font-size: 0.85rem;
+  color: var(--color-text);
+  font-size: 1rem;
 }
 
 .score-factor-heading {
@@ -1544,12 +1558,10 @@ button {
 .factor-progress {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    #25f4ee,
-    #8b5cf6,
-    #fe2c55
-  );
+  background: linear-gradient(90deg,
+      var(--color-primary),
+      var(--color-accent),
+      var(--color-secondary));
 }
 
 .score-total {
