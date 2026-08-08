@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
+import InsightCard from '../components/InsightCard'
+
 import {
     getAnalyticsOverview,
     getCategoryAnalytics,
@@ -7,7 +10,7 @@ import {
 
 function formatDate(dateString) {
     if (!dateString) {
-        return 'No imports yet'
+        return 'No snapshots yet'
     }
 
     return new Intl.DateTimeFormat('en-US', {
@@ -25,9 +28,13 @@ function DashboardPage() {
     const [error, setError] = useState('')
 
     useEffect(() => {
-        async function loadDashboard() {
+        async function loadOverview() {
             try {
-                const [overviewData, categoryData, shopData] = await Promise.all([
+                const [
+                    overviewData,
+                    categoryData,
+                    shopData,
+                ] = await Promise.all([
                     getAnalyticsOverview(),
                     getCategoryAnalytics(),
                     getShopAnalytics(),
@@ -37,129 +44,259 @@ function DashboardPage() {
                 setCategories(categoryData)
                 setShops(shopData)
             } catch {
-                setError('Unable to load dashboard analytics.')
+                setError('Unable to load market overview.')
             } finally {
                 setIsLoading(false)
             }
         }
 
-        loadDashboard()
+        loadOverview()
     }, [])
 
+    const rankedCategories = useMemo(
+        () =>
+            [...categories].sort(
+                (a, b) => b.product_count - a.product_count,
+            ),
+        [categories],
+    )
+
+    const rankedShops = useMemo(
+        () =>
+            [...shops].sort(
+                (a, b) => b.product_count - a.product_count,
+            ),
+        [shops],
+    )
+
+    const opportunityInsights = useMemo(() => {
+        if (!overview || rankedCategories.length === 0) {
+            return []
+        }
+
+        return rankedCategories.slice(0, 3).map((category) => {
+            const categoryShare =
+                overview.total_products > 0
+                    ? category.product_count / overview.total_products
+                    : 0
+
+            const shopsInMarket = overview.total_shops || 0
+
+            let status = 'medium'
+            let label = 'Worth watching'
+
+            if (categoryShare >= 0.4 && shopsInMarket <= 5) {
+                status = 'high'
+                label = 'High opportunity'
+            } else if (categoryShare < 0.2) {
+                status = 'low'
+                label = 'Early signal'
+            }
+
+            return {
+                title: category.category,
+                description: `${category.product_count} tracked products • ${Math.round(
+                    categoryShare * 100,
+                )}% of the current market • ${label}`,
+                status,
+            }
+        })
+    }, [overview, rankedCategories])
+
     if (isLoading) {
-        return <p>Loading dashboard...</p>
+        return <p>Loading market overview...</p>
     }
 
-    if (error) {
-        return <p>{error}</p>
+    if (error || !overview) {
+        return (
+            <div className="error-state">
+                <h2>Unable to load market overview</h2>
+                <p>{error || 'No overview data available.'}</p>
+            </div>
+        )
     }
 
     return (
         <>
-            <div className="page-header">
+            <div className="page-header market-page-header">
                 <div>
-                    <h1>Dashboard</h1>
-                    <p>Monitor your ShopLens product data.</p>
+                    <p className="page-eyebrow">
+                        Market Intelligence
+                    </p>
+
+                    <h1>Market Overview</h1>
+
+                    <p>
+                        See where products, shops, and categories are
+                        concentrated across your latest TikTok Shop snapshot.
+                    </p>
+                </div>
+
+                <div className="snapshot-date">
+                    <span>Latest snapshot</span>
+                    <strong>
+                        {formatDate(overview.latest_import)}
+                    </strong>
                 </div>
             </div>
 
-            <section className="overview-grid">
-                <article className="overview-card">
-                    <p>Total Products</p>
-                    <h2>{overview.total_products}</h2>
-                </article>
-
-                <article className="overview-card">
-                    <p>Total Shops</p>
-                    <h2>{overview.total_shops}</h2>
-                </article>
-
-                <article className="overview-card">
-                    <p>Total Categories</p>
-                    <h2>{overview.total_categories}</h2>
-                </article>
-
-                <article className="overview-card">
-                    <p>Latest Import</p>
-                    <h2 className="overview-date">
-                        {formatDate(overview.latest_import)}
-                    </h2>
-                </article>
-            </section>
-
-            <section className="analytics-section">
+            <section className="market-section">
                 <div className="section-header">
-                    <h2>Products by Category</h2>
-                    <p>See how your products are distributed across categories.</p>
+                    <p className="page-eyebrow">Snapshot</p>
+                    <h2>Current Market</h2>
+                    <p>
+                        The latest composition of your tracked product dataset.
+                    </p>
                 </div>
 
-                <div className="category-card">
-                    {categories.length === 0 ? (
-                        <p className="empty-state">No category data available.</p>
-                    ) : (
-                        <div className="category-list">
-                            {categories.map((item) => {
-                                const percentage =
-                                    overview.total_products > 0
-                                        ? (item.product_count / overview.total_products) * 100
-                                        : 0
+                <div className="market-snapshot-grid">
+                    <div className="market-metric">
+                        <span>Tracked Products</span>
+                        <strong>{overview.total_products}</strong>
+                    </div>
 
-                                return (
-                                    <div className="category-row" key={item.category}>
-                                        <div className="category-row-header">
-                                            <span>{item.category}</span>
-                                            <span>{item.product_count} products</span>
-                                        </div>
+                    <div className="market-metric">
+                        <span>Active Shops</span>
+                        <strong>{overview.total_shops}</strong>
+                    </div>
 
-                                        <div className="category-track">
-                                            <div
-                                                className="category-bar"
-                                                style={{ width: `${percentage}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    )}
+                    <div className="market-metric">
+                        <span>Categories</span>
+                        <strong>{overview.total_categories}</strong>
+                    </div>
+
+                    <div className="market-metric">
+                        <span>Largest Shop</span>
+                        <strong>
+                            {rankedShops[0]?.shop_name ?? '—'}
+                        </strong>
+                    </div>
                 </div>
             </section>
 
-            <section className="analytics-section">
+            <section className="market-section">
                 <div className="section-header">
-                    <h2>Products by Shop</h2>
-                    <p>Compare how many products belong to each shop.</p>
+                    <p className="page-eyebrow">Signals</p>
+                    <h2>Opportunity Feed</h2>
+                    <p>
+                        Quick signals derived from your current market snapshot.
+                    </p>
                 </div>
 
-                <div className="category-card">
-                    {shops.length === 0 ? (
-                        <p className="empty-state">No shop data available.</p>
-                    ) : (
-                        <div className="category-list">
-                            {shops.map((shop) => {
-                                const percentage =
-                                    overview.total_products > 0
-                                        ? (shop.product_count / overview.total_products) * 100
-                                        : 0
+                {opportunityInsights.length === 0 ? (
+                    <div className="empty-research-state">
+                        <h2>No market signals yet</h2>
+                        <p>
+                            Import more product data to generate category
+                            opportunities.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="insight-grid">
+                        {opportunityInsights.map((insight) => (
+                            <InsightCard
+                                key={insight.title}
+                                title={insight.title}
+                                description={insight.description}
+                                status={insight.status}
+                            />
+                        ))}
+                    </div>
+                )}
+            </section>
 
-                                return (
-                                    <div className="category-row" key={shop.shop_name}>
-                                        <div className="category-row-header">
-                                            <span>{shop.shop_name}</span>
-                                            <span>{shop.product_count} products</span>
+            <section className="market-section market-two-column">
+                <div>
+                    <div className="section-header">
+                        <p className="page-eyebrow">Distribution</p>
+                        <h2>Category Concentration</h2>
+                        <p>
+                            Understand which categories dominate the tracked
+                            market.
+                        </p>
+                    </div>
+
+                    <div className="research-panel">
+                        {rankedCategories.map((category, index) => {
+                            const percentage =
+                                overview.total_products > 0
+                                    ? (
+                                        category.product_count /
+                                        overview.total_products
+                                    ) * 100
+                                    : 0
+
+                            return (
+                                <div
+                                    className="ranking-row"
+                                    key={category.category}
+                                >
+                                    <div className="ranking-position">
+                                        #{index + 1}
+                                    </div>
+
+                                    <div className="ranking-content">
+                                        <div className="ranking-label">
+                                            <strong>{category.category}</strong>
+
+                                            <span>
+                                                {category.product_count} products
+                                            </span>
                                         </div>
 
-                                        <div className="category-track">
+                                        <div className="research-track">
                                             <div
-                                                className="category-bar"
-                                                style={{ width: `${percentage}%` }}
+                                                className="research-bar"
+                                                style={{
+                                                    width: `${percentage}%`,
+                                                }}
                                             />
                                         </div>
                                     </div>
-                                )
-                            })}
-                        </div>
-                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+
+                <div>
+                    <div className="section-header">
+                        <p className="page-eyebrow">Competition</p>
+                        <h2>Top Shops</h2>
+                        <p>
+                            Shops with the largest presence in your current
+                            dataset.
+                        </p>
+                    </div>
+
+                    <div className="research-panel">
+                        {rankedShops.length === 0 ? (
+                            <p className="empty-state">
+                                No shop data available.
+                            </p>
+                        ) : (
+                            rankedShops.slice(0, 5).map((shop, index) => (
+                                <div
+                                    className="shop-ranking-row"
+                                    key={shop.shop_name}
+                                >
+                                    <span className="shop-rank">
+                                        {index + 1}
+                                    </span>
+
+                                    <div>
+                                        <strong>{shop.shop_name}</strong>
+                                        <p>
+                                            {shop.product_count}{' '}
+                                            {shop.product_count === 1
+                                                ? 'product'
+                                                : 'products'}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
             </section>
         </>
