@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 
 import DeleteProductModal from '../components/DeleteProductModal'
 import EditProductModal from '../components/EditProductModal'
+import FeaturedOpportunity from '../components/FeaturedOpportunity'
 import ProductDetailsModal from '../components/ProductDetailsModal'
 import ProductDiscoveryCard from '../components/ProductDiscoveryCard'
 import ProductFilters from '../components/ProductFilters'
@@ -13,6 +14,7 @@ import { getProducts } from '../api/products'
 import { updateProduct } from '../api/updateProduct'
 
 import useProductDiscovery from '../hooks/useProductDiscovery'
+import { getFeaturedOpportunity } from '../intelligence/featuredOpportunityEngine'
 import { getShopLensScore } from '../services/shoplensScore'
 
 function ProductsPage() {
@@ -77,6 +79,12 @@ function ProductsPage() {
             shops,
         )
         : null
+
+    const featuredOpportunity = getFeaturedOpportunity(
+        sortedProducts,
+        categories,
+        shops,
+    )
 
     function openEditModal(product) {
         setEditingProduct(product)
@@ -223,6 +231,11 @@ function ProductsPage() {
                     onCategoryChange={handleCategoryChange}
                     onShopChange={handleShopChange}
                     onSortChange={handleSortChange}
+                />
+
+                <FeaturedOpportunity
+                    opportunity={featuredOpportunity}
+                    onAnalyze={setSelectedProduct}
                 />
 
                 <div className="discovery-results-header">

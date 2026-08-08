@@ -1795,3 +1795,111 @@ button {
     border-bottom: none;
   }
 }
+
+.featured-opportunity {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.featured-opportunity-accent {
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-accent),
+    var(--color-secondary)
+  );
+}
+
+.featured-opportunity-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-6);
+}
+
+.featured-opportunity-content h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.4rem;
+}
+
+.featured-opportunity-meta {
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-secondary);
+  font-size: 0.88rem;
+}
+
+.featured-opportunity-score {
+  min-width: 140px;
+  text-align: right;
+}
+
+.featured-opportunity-score span {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.featured-opportunity-score strong {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text);
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+
+.featured-opportunity-score small {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+}
+
+.featured-opportunity-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-background);
+}
+
+.featured-opportunity-label {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.featured-opportunity-footer p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 700px) {
+  .featured-opportunity-content,
+  .featured-opportunity-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .featured-opportunity-score {
+    text-align: left;
+  }
+}
