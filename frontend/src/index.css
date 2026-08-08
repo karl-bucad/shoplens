@@ -1584,3 +1584,11 @@ button {
   color: #0f172a;
   font-size: 1rem;
 }
+
+.market-metric small {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}

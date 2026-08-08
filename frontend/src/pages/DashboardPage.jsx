@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
+import ExecutiveSummary from '../components/dashboard/ExecutiveSummary'
 import CategoryDistributionChart from '../components/charts/CategoryDistributionChart'
 import InsightCard from '../components/InsightCard'
 
@@ -177,6 +178,11 @@ function DashboardPage() {
                     </div>
                 </div>
             </section>
+
+            <ExecutiveSummary
+                overview={overview}
+                rankedCategories={rankedCategories}
+            />
 
             <section className="market-section">
                 <div className="section-header">
