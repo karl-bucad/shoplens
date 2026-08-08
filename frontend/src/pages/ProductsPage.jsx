@@ -4,21 +4,59 @@ import { toast } from 'sonner'
 import DeleteProductModal from '../components/DeleteProductModal'
 import EditProductModal from '../components/EditProductModal'
 import ProductDetailsModal from '../components/ProductDetailsModal'
+import ProductDiscoveryCard from '../components/ProductDiscoveryCard'
 import ProductFilters from '../components/ProductFilters'
 import ProductsPagination from '../components/ProductsPagination'
-import ProductsTable from '../components/ProductsTable'
-import TableSkeleton from '../components/TableSkeleton'
 
 import { deleteProduct } from '../api/deleteProduct'
 import { getProducts } from '../api/products'
 import { updateProduct } from '../api/updateProduct'
 
-function formatDate(dateString) {
-    return new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    }).format(new Date(dateString))
+function calculateShopLensScore(
+    product,
+    products,
+    categories,
+    shops,
+) {
+    if (products.length === 0) {
+        return 50
+    }
+
+    const categoryCount = products.filter(
+        (item) => item.category === product.category,
+    ).length
+
+    const shopCount = products.filter(
+        (item) => item.shop_name === product.shop_name,
+    ).length
+
+    const categoryShare = categoryCount / products.length
+
+    let score = 40
+
+    // Strong category presence
+    score += Math.min(categoryShare * 40, 25)
+
+    // Focused shops receive a small discovery boost
+    if (shopCount <= 2) {
+        score += 20
+    } else if (shopCount <= 5) {
+        score += 12
+    } else {
+        score += 5
+    }
+
+    // Reward products in markets with multiple categories
+    if (categories.length > 3) {
+        score += 8
+    }
+
+    // Reward a diverse shop landscape
+    if (shops.length > 3) {
+        score += 7
+    }
+
+    return Math.min(100, Math.round(score))
 }
 
 function ProductsPage() {
@@ -40,7 +78,7 @@ function ProductsPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
-    const itemsPerPage = 10
+    const itemsPerPage = 6
 
     useEffect(() => {
         async function loadProducts() {
@@ -48,7 +86,7 @@ function ProductsPage() {
                 const data = await getProducts()
                 setProducts(data)
             } catch {
-                setError('Unable to load products.')
+                setError('Unable to load product discovery data.')
             } finally {
                 setIsLoading(false)
             }
@@ -228,8 +266,8 @@ function ProductsPage() {
 
             setDeletingProduct(null)
 
-            toast.success('Product deleted', {
-                description: `${deletedName} was removed successfully.`,
+            toast.success('Product removed', {
+                description: `${deletedName} was removed from this snapshot.`,
             })
         } catch (error) {
             toast.error('Delete failed', {
@@ -242,80 +280,137 @@ function ProductsPage() {
         }
     }
 
+    if (isLoading) {
+        return (
+            <>
+                <div className="page-header">
+                    <div>
+                        <p className="page-eyebrow">Discovery</p>
+                        <h1>Product Discovery</h1>
+                        <p>Scanning your market snapshot for products...</p>
+                    </div>
+                </div>
+
+                <div className="discovery-loading">
+                    <div className="skeleton skeleton-discovery-card" />
+                    <div className="skeleton skeleton-discovery-card" />
+                    <div className="skeleton skeleton-discovery-card" />
+                </div>
+            </>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="error-state">
+                <h2>Unable to load Product Discovery</h2>
+                <p>{error}</p>
+            </div>
+        )
+    }
+
     return (
         <>
-            <div className="page-header">
+            <div className="page-header market-page-header">
                 <div>
-                    <h1>Products</h1>
-                    <p>Browse and manage your imported product data.</p>
+                    <p className="page-eyebrow">Discovery</p>
+
+                    <h1>Product Discovery</h1>
+
+                    <p>
+                        Find products worth investigating across your latest
+                        TikTok Shop market snapshot.
+                    </p>
+                </div>
+
+                <div className="discovery-summary">
+                    <span>Tracked opportunities</span>
+                    <strong>{products.length}</strong>
                 </div>
             </div>
 
-            {isLoading ? (
-                <div className="table-card">
-                    <TableSkeleton rows={8} />
-                </div>
-            ) : error ? (
-                <div className="error-state">
-                    <h2>Unable to load products</h2>
-                    <p>{error}</p>
-                </div>
-            ) : (
-                <>
-                    <ProductFilters
-                        searchTerm={searchTerm}
-                        selectedCategory={selectedCategory}
-                        selectedShop={selectedShop}
-                        sortOption={sortOption}
-                        categories={categories}
-                        shops={shops}
-                        onSearchChange={handleSearchChange}
-                        onCategoryChange={handleCategoryChange}
-                        onShopChange={handleShopChange}
-                        onSortChange={handleSortChange}
-                    />
+            <section className="market-section">
+                <ProductFilters
+                    searchTerm={searchTerm}
+                    selectedCategory={selectedCategory}
+                    selectedShop={selectedShop}
+                    sortOption={sortOption}
+                    categories={categories}
+                    shops={shops}
+                    onSearchChange={handleSearchChange}
+                    onCategoryChange={handleCategoryChange}
+                    onShopChange={handleShopChange}
+                    onSortChange={handleSortChange}
+                />
 
-                    <p className="pagination-info">
-                        Showing {startItem}–{endItem} of {sortedProducts.length}{' '}
-                        products
-                    </p>
-
-                    <div className="table-card">
-                        {products.length === 0 ? (
-                            <p className="empty-state">No products available.</p>
-                        ) : sortedProducts.length === 0 ? (
-                            <p className="empty-state">
-                                No products match your filters.
-                            </p>
-                        ) : (
-                            <>
-                                <ProductsTable
-                                    products={currentProducts}
-                                    formatDate={formatDate}
-                                    onView={setSelectedProduct}
-                                    onEdit={openEditModal}
-                                    onDelete={openDeleteModal}
-                                />
-
-                                <ProductsPagination
-                                    currentPage={safeCurrentPage}
-                                    totalPages={totalPages}
-                                    onPrevious={() =>
-                                        setCurrentPage((page) =>
-                                            Math.max(page - 1, 1),
-                                        )
-                                    }
-                                    onNext={() =>
-                                        setCurrentPage((page) =>
-                                            Math.min(page + 1, totalPages),
-                                        )
-                                    }
-                                />
-                            </>
-                        )}
+                <div className="discovery-results-header">
+                    <div>
+                        <p className="page-eyebrow">Research Feed</p>
+                        <h2>Tracked Products</h2>
                     </div>
-                </>
-            )}
+
+                    <span>
+                        Showing {startItem}–{endItem} of {sortedProducts.length}
+                    </span>
+                </div>
+
+                {products.length === 0 ? (
+                    <div className="empty-research-state">
+                        <h2>No products to discover yet</h2>
+                        <p>
+                            Import a market snapshot to begin finding product
+                            opportunities.
+                        </p>
+                    </div>
+                ) : sortedProducts.length === 0 ? (
+                    <div className="empty-research-state">
+                        <h2>No matching opportunities</h2>
+                        <p>
+                            Try changing your search or research filters.
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="discovery-feed">
+                            {currentProducts.map((product, index) => {
+                                const score = calculateShopLensScore(
+                                    product,
+                                    products,
+                                    categories,
+                                    shops,
+                                )
+
+                                return (
+                                    <ProductDiscoveryCard
+                                        key={product.id}
+                                        product={product}
+                                        rank={startIndex + index + 1}
+                                        score={score}
+                                        onAnalyze={setSelectedProduct}
+                                        onEdit={openEditModal}
+                                        onDelete={openDeleteModal}
+                                    />
+                                )
+                            })}
+                        </div>
+
+                        <ProductsPagination
+                            currentPage={safeCurrentPage}
+                            totalPages={totalPages}
+                            onPrevious={() =>
+                                setCurrentPage((page) =>
+                                    Math.max(page - 1, 1),
+                                )
+                            }
+                            onNext={() =>
+                                setCurrentPage((page) =>
+                                    Math.min(page + 1, totalPages),
+                                )
+                            }
+                        />
+                    </>
+                )}
+            </section>
 
             <ProductDetailsModal
                 product={selectedProduct}
