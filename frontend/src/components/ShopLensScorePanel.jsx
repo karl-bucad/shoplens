@@ -45,44 +45,53 @@ function ShopLensScorePanel({
                         </p>
 
                         <span>
-                            Transparent factors from your current market snapshot.
+                            Each factor contributes to a fixed 100-point model.
                         </span>
                     </div>
                 </div>
 
                 <div className="score-factor-list">
-                    {factors.map((factor) => (
-                        <div
-                            className="score-factor"
-                            key={factor.title}
-                        >
-                            <div className="score-factor-points">
-                                +{factor.points}
-                            </div>
+                    {factors.map((factor) => {
+                        const percentage =
+                            (factor.points / factor.maxPoints) * 100
 
-                            <div className="score-factor-content">
-                                <strong>{factor.title}</strong>
-                                <p>{factor.description}</p>
+                        return (
+                            <div
+                                className="score-factor"
+                                key={factor.title}
+                            >
+                                <div className="score-factor-points">
+                                    {factor.points}/{factor.maxPoints}
+                                </div>
+
+                                <div className="score-factor-content">
+                                    <div className="score-factor-heading">
+                                        <strong>{factor.title}</strong>
+
+                                        <span>
+                                            {Math.round(percentage)}%
+                                        </span>
+                                    </div>
+
+                                    <div className="factor-track">
+                                        <div
+                                            className="factor-progress"
+                                            style={{
+                                                width: `${percentage}%`,
+                                            }}
+                                        />
+                                    </div>
+
+                                    <p>{factor.description}</p>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
             </div>
 
             <div className="score-total">
-                <span>Base score</span>
-                <strong>40</strong>
-
-                <span>Signal points</span>
-                <strong>
-                    +
-                    {factors.reduce(
-                        (total, factor) => total + factor.points,
-                        0,
-                    )}
-                </strong>
-
-                <span>Final score</span>
+                <span>Total</span>
                 <strong>{score}/100</strong>
             </div>
 
