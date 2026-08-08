@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
+import CategoryDistributionChart from '../components/charts/CategoryDistributionChart'
 import InsightCard from '../components/InsightCard'
 
 import {
@@ -103,6 +104,19 @@ function DashboardPage() {
         })
     }, [overview, rankedCategories])
 
+    const chartProducts = useMemo(
+        () =>
+            rankedCategories.flatMap((category) =>
+                Array.from(
+                    { length: category.product_count },
+                    () => ({
+                        category: category.category,
+                    }),
+                ),
+            ),
+        [rankedCategories],
+    )
+
     if (isLoading) {
         return <p>Loading market overview...</p>
     }
@@ -134,6 +148,7 @@ function DashboardPage() {
 
                 <div className="snapshot-date">
                     <span>Latest snapshot</span>
+
                     <strong>
                         {formatDate(overview.latest_import)}
                     </strong>
@@ -143,7 +158,9 @@ function DashboardPage() {
             <section className="market-section">
                 <div className="section-header">
                     <p className="page-eyebrow">Snapshot</p>
+
                     <h2>Current Market</h2>
+
                     <p>
                         The latest composition of your tracked product dataset.
                     </p>
@@ -177,7 +194,9 @@ function DashboardPage() {
             <section className="market-section">
                 <div className="section-header">
                     <p className="page-eyebrow">Signals</p>
+
                     <h2>Opportunity Feed</h2>
+
                     <p>
                         Quick signals derived from your current market snapshot.
                     </p>
@@ -186,6 +205,7 @@ function DashboardPage() {
                 {opportunityInsights.length === 0 ? (
                     <div className="empty-research-state">
                         <h2>No market signals yet</h2>
+
                         <p>
                             Import more product data to generate category
                             opportunities.
@@ -205,11 +225,30 @@ function DashboardPage() {
                 )}
             </section>
 
+            <section className="market-section">
+                <div className="section-header">
+                    <p className="page-eyebrow">Analytics</p>
+
+                    <h2>Category Distribution</h2>
+
+                    <p>
+                        Explore how products are distributed across categories
+                        in your latest market snapshot.
+                    </p>
+                </div>
+
+                <CategoryDistributionChart
+                    products={chartProducts}
+                />
+            </section>
+
             <section className="market-section market-two-column">
                 <div>
                     <div className="section-header">
                         <p className="page-eyebrow">Distribution</p>
+
                         <h2>Category Concentration</h2>
+
                         <p>
                             Understand which categories dominate the tracked
                             market.
@@ -217,52 +256,65 @@ function DashboardPage() {
                     </div>
 
                     <div className="research-panel">
-                        {rankedCategories.map((category, index) => {
-                            const percentage =
-                                overview.total_products > 0
-                                    ? (
-                                        category.product_count /
-                                        overview.total_products
-                                    ) * 100
-                                    : 0
+                        {rankedCategories.length === 0 ? (
+                            <p className="empty-state">
+                                No category data available.
+                            </p>
+                        ) : (
+                            rankedCategories.map((category, index) => {
+                                const percentage =
+                                    overview.total_products > 0
+                                        ? (
+                                            category.product_count /
+                                            overview.total_products
+                                        ) * 100
+                                        : 0
 
-                            return (
-                                <div
-                                    className="ranking-row"
-                                    key={category.category}
-                                >
-                                    <div className="ranking-position">
-                                        #{index + 1}
-                                    </div>
-
-                                    <div className="ranking-content">
-                                        <div className="ranking-label">
-                                            <strong>{category.category}</strong>
-
-                                            <span>
-                                                {category.product_count} products
-                                            </span>
+                                return (
+                                    <div
+                                        className="ranking-row"
+                                        key={category.category}
+                                    >
+                                        <div className="ranking-position">
+                                            #{index + 1}
                                         </div>
 
-                                        <div className="research-track">
-                                            <div
-                                                className="research-bar"
-                                                style={{
-                                                    width: `${percentage}%`,
-                                                }}
-                                            />
+                                        <div className="ranking-content">
+                                            <div className="ranking-label">
+                                                <strong>
+                                                    {category.category}
+                                                </strong>
+
+                                                <span>
+                                                    {category.product_count}{' '}
+                                                    {category.product_count === 1
+                                                        ? 'product'
+                                                        : 'products'}
+                                                </span>
+                                            </div>
+
+                                            <div className="research-track">
+                                                <div
+                                                    className="research-bar"
+                                                    style={{
+                                                        width: `${percentage}%`,
+                                                    }}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            )
-                        })}
+                                )
+                            })
+                        )}
                     </div>
                 </div>
 
                 <div>
                     <div className="section-header">
                         <p className="page-eyebrow">Competition</p>
+
                         <h2>Top Shops</h2>
+
                         <p>
                             Shops with the largest presence in your current
                             dataset.
@@ -286,6 +338,7 @@ function DashboardPage() {
 
                                     <div>
                                         <strong>{shop.shop_name}</strong>
+
                                         <p>
                                             {shop.product_count}{' '}
                                             {shop.product_count === 1
