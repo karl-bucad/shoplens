@@ -12,17 +12,11 @@ import { deleteProduct } from '../api/deleteProduct'
 import { getProducts } from '../api/products'
 import { updateProduct } from '../api/updateProduct'
 
+import useProductDiscovery from '../hooks/useProductDiscovery'
 import { getShopLensScore } from '../services/shoplensScore'
 
 function ProductsPage() {
     const [products, setProducts] = useState([])
-    const [searchTerm, setSearchTerm] = useState('')
-    const [selectedCategory, setSelectedCategory] = useState('All')
-    const [selectedShop, setSelectedShop] = useState('All')
-    const [sortOption, setSortOption] = useState('newest')
-    const [currentPage, setCurrentPage] = useState(1)
-
-    const [selectedProduct, setSelectedProduct] = useState(null)
 
     const [editingProduct, setEditingProduct] = useState(null)
     const [isSaving, setIsSaving] = useState(false)
@@ -33,7 +27,32 @@ function ProductsPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
-    const itemsPerPage = 6
+    const {
+        searchTerm,
+        selectedCategory,
+        selectedShop,
+        sortOption,
+        selectedProduct,
+
+        categories,
+        shops,
+        sortedProducts,
+        currentProducts,
+
+        totalPages,
+        safeCurrentPage,
+        startIndex,
+        startItem,
+        endItem,
+
+        setCurrentPage,
+        setSelectedProduct,
+
+        handleSearchChange,
+        handleCategoryChange,
+        handleShopChange,
+        handleSortChange,
+    } = useProductDiscovery(products, 6)
 
     useEffect(() => {
         async function loadProducts() {
@@ -50,86 +69,6 @@ function ProductsPage() {
         loadProducts()
     }, [])
 
-    const categories = [
-        'All',
-        ...new Set(
-            products
-                .map((product) => product.category)
-                .filter(Boolean),
-        ),
-    ]
-
-    const shops = [
-        'All',
-        ...new Set(
-            products
-                .map((product) => product.shop_name)
-                .filter(Boolean),
-        ),
-    ]
-
-    const filteredProducts = products.filter((product) => {
-        const search = searchTerm.trim().toLowerCase()
-
-        const matchesSearch =
-            product.name.toLowerCase().includes(search) ||
-            (product.shop_name ?? '').toLowerCase().includes(search) ||
-            (product.category ?? '').toLowerCase().includes(search)
-
-        const matchesCategory =
-            selectedCategory === 'All' ||
-            product.category === selectedCategory
-
-        const matchesShop =
-            selectedShop === 'All' ||
-            product.shop_name === selectedShop
-
-        return matchesSearch && matchesCategory && matchesShop
-    })
-
-    const sortedProducts = [...filteredProducts].sort((a, b) => {
-        if (sortOption === 'oldest') {
-            return (
-                new Date(a.created_at).getTime() -
-                new Date(b.created_at).getTime()
-            )
-        }
-
-        if (sortOption === 'name-ascending') {
-            return a.name.localeCompare(b.name)
-        }
-
-        if (sortOption === 'name-descending') {
-            return b.name.localeCompare(a.name)
-        }
-
-        return (
-            new Date(b.created_at).getTime() -
-            new Date(a.created_at).getTime()
-        )
-    })
-
-    const totalPages = Math.max(
-        1,
-        Math.ceil(sortedProducts.length / itemsPerPage),
-    )
-
-    const safeCurrentPage = Math.min(currentPage, totalPages)
-    const startIndex = (safeCurrentPage - 1) * itemsPerPage
-
-    const currentProducts = sortedProducts.slice(
-        startIndex,
-        startIndex + itemsPerPage,
-    )
-
-    const startItem =
-        sortedProducts.length === 0 ? 0 : startIndex + 1
-
-    const endItem = Math.min(
-        startIndex + itemsPerPage,
-        sortedProducts.length,
-    )
-
     const selectedScoreData = selectedProduct
         ? getShopLensScore(
             selectedProduct,
@@ -138,30 +77,6 @@ function ProductsPage() {
             shops,
         )
         : null
-
-    function resetToFirstPage() {
-        setCurrentPage(1)
-    }
-
-    function handleSearchChange(event) {
-        setSearchTerm(event.target.value)
-        resetToFirstPage()
-    }
-
-    function handleCategoryChange(event) {
-        setSelectedCategory(event.target.value)
-        resetToFirstPage()
-    }
-
-    function handleShopChange(event) {
-        setSelectedShop(event.target.value)
-        resetToFirstPage()
-    }
-
-    function handleSortChange(event) {
-        setSortOption(event.target.value)
-        resetToFirstPage()
-    }
 
     function openEditModal(product) {
         setEditingProduct(product)
@@ -250,7 +165,9 @@ function ProductsPage() {
                     <div>
                         <p className="page-eyebrow">Discovery</p>
                         <h1>Product Discovery</h1>
-                        <p>Scanning your market snapshot for products...</p>
+                        <p>
+                            Scanning your market snapshot for products...
+                        </p>
                     </div>
                 </div>
 
@@ -276,7 +193,9 @@ function ProductsPage() {
         <>
             <div className="page-header market-page-header">
                 <div>
-                    <p className="page-eyebrow">Discovery</p>
+                    <p className="page-eyebrow">
+                        Discovery
+                    </p>
 
                     <h1>Product Discovery</h1>
 
@@ -308,18 +227,23 @@ function ProductsPage() {
 
                 <div className="discovery-results-header">
                     <div>
-                        <p className="page-eyebrow">Research Feed</p>
+                        <p className="page-eyebrow">
+                            Research Feed
+                        </p>
+
                         <h2>Tracked Products</h2>
                     </div>
 
                     <span>
-                        Showing {startItem}–{endItem} of {sortedProducts.length}
+                        Showing {startItem}–{endItem} of{' '}
+                        {sortedProducts.length}
                     </span>
                 </div>
 
                 {products.length === 0 ? (
                     <div className="empty-research-state">
                         <h2>No products to discover yet</h2>
+
                         <p>
                             Import a market snapshot to begin finding product
                             opportunities.
@@ -328,6 +252,7 @@ function ProductsPage() {
                 ) : sortedProducts.length === 0 ? (
                     <div className="empty-research-state">
                         <h2>No matching opportunities</h2>
+
                         <p>
                             Try changing your search or research filters.
                         </p>
