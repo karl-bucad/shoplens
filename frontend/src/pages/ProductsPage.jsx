@@ -12,52 +12,7 @@ import { deleteProduct } from '../api/deleteProduct'
 import { getProducts } from '../api/products'
 import { updateProduct } from '../api/updateProduct'
 
-function calculateShopLensScore(
-    product,
-    products,
-    categories,
-    shops,
-) {
-    if (products.length === 0) {
-        return 50
-    }
-
-    const categoryCount = products.filter(
-        (item) => item.category === product.category,
-    ).length
-
-    const shopCount = products.filter(
-        (item) => item.shop_name === product.shop_name,
-    ).length
-
-    const categoryShare = categoryCount / products.length
-
-    let score = 40
-
-    // Strong category presence
-    score += Math.min(categoryShare * 40, 25)
-
-    // Focused shops receive a small discovery boost
-    if (shopCount <= 2) {
-        score += 20
-    } else if (shopCount <= 5) {
-        score += 12
-    } else {
-        score += 5
-    }
-
-    // Reward products in markets with multiple categories
-    if (categories.length > 3) {
-        score += 8
-    }
-
-    // Reward a diverse shop landscape
-    if (shops.length > 3) {
-        score += 7
-    }
-
-    return Math.min(100, Math.round(score))
-}
+import { getShopLensScore } from '../services/shoplensScore'
 
 function ProductsPage() {
     const [products, setProducts] = useState([])
@@ -160,7 +115,6 @@ function ProductsPage() {
     )
 
     const safeCurrentPage = Math.min(currentPage, totalPages)
-
     const startIndex = (safeCurrentPage - 1) * itemsPerPage
 
     const currentProducts = sortedProducts.slice(
@@ -175,6 +129,15 @@ function ProductsPage() {
         startIndex + itemsPerPage,
         sortedProducts.length,
     )
+
+    const selectedScoreData = selectedProduct
+        ? getShopLensScore(
+            selectedProduct,
+            products,
+            categories,
+            shops,
+        )
+        : null
 
     function resetToFirstPage() {
         setCurrentPage(1)
@@ -373,7 +336,7 @@ function ProductsPage() {
                     <>
                         <div className="discovery-feed">
                             {currentProducts.map((product, index) => {
-                                const score = calculateShopLensScore(
+                                const scoreData = getShopLensScore(
                                     product,
                                     products,
                                     categories,
@@ -385,7 +348,7 @@ function ProductsPage() {
                                         key={product.id}
                                         product={product}
                                         rank={startIndex + index + 1}
-                                        score={score}
+                                        score={scoreData.score}
                                         onAnalyze={setSelectedProduct}
                                         onEdit={openEditModal}
                                         onDelete={openDeleteModal}
@@ -414,6 +377,7 @@ function ProductsPage() {
 
             <ProductDetailsModal
                 product={selectedProduct}
+                scoreData={selectedScoreData}
                 onClose={() => setSelectedProduct(null)}
             />
 

@@ -1,54 +1,99 @@
-function ProductDetailsModal({ product, onClose }) {
-    if (!product) {
+import ShopLensScorePanel from './ShopLensScorePanel'
+
+function formatDate(dateString) {
+    if (!dateString) {
+        return 'Unknown'
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+    }).format(new Date(dateString))
+}
+
+function ProductDetailsModal({
+    product,
+    scoreData,
+    onClose,
+}) {
+    if (!product || !scoreData) {
         return null
     }
 
-    function formatDate(dateString) {
-        return new Intl.DateTimeFormat('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-        }).format(new Date(dateString))
-    }
-
     return (
-        <div className="modal-overlay" onClick={onClose}>
+        <div
+            className="modal-overlay"
+            onClick={onClose}
+        >
             <div
-                className="modal-card"
+                className="modal-card product-intelligence-modal"
                 onClick={(event) => event.stopPropagation()}
             >
-                <h2>Product Details</h2>
-
-                <div className="modal-content">
+                <div className="product-intelligence-header">
                     <div>
-                        <strong>Name</strong>
-                        <p>{product.name}</p>
+                        <p className="page-eyebrow">
+                            Product Intelligence
+                        </p>
+
+                        <h2>{product.name}</h2>
+
+                        <p>
+                            Research context from your current market snapshot.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        className="intelligence-close"
+                        onClick={onClose}
+                        aria-label="Close product intelligence"
+                    >
+                        ×
+                    </button>
+                </div>
+
+                <div className="product-intelligence-meta">
+                    <div>
+                        <span>Shop</span>
+                        <strong>
+                            {product.shop_name ?? 'Unknown shop'}
+                        </strong>
                     </div>
 
                     <div>
-                        <strong>Shop</strong>
-                        <p>{product.shop_name}</p>
+                        <span>Category</span>
+                        <strong>
+                            {product.category ?? 'Uncategorized'}
+                        </strong>
                     </div>
 
                     <div>
-                        <strong>Category</strong>
-                        <p>{product.category}</p>
-                    </div>
-
-                    <div>
-                        <strong>Created</strong>
-                        <p>{formatDate(product.created_at)}</p>
+                        <span>Imported</span>
+                        <strong>
+                            {formatDate(product.created_at)}
+                        </strong>
                     </div>
                 </div>
 
-                <div className="modal-actions">
-                    <button
-                        type="button"
-                        className="close-button"
-                        onClick={onClose}
-                    >
-                        Close
-                    </button>
+                <ShopLensScorePanel
+                    score={scoreData.score}
+                    factors={scoreData.factors}
+                    recommendation={scoreData.recommendation}
+                    confidence={scoreData.confidence}
+                />
+
+                <div className="product-intelligence-note">
+                    <p className="page-eyebrow">
+                        Research Note
+                    </p>
+
+                    <p>
+                        ShopLens highlights this product based on patterns in
+                        your imported dataset. Use the score as a research
+                        signal, then validate demand, competition, pricing,
+                        creator activity, and sales performance separately.
+                    </p>
                 </div>
             </div>
         </div>
