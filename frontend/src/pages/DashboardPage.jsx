@@ -1,12 +1,13 @@
-import { useMemo } from 'react'
-
 import CategoryDistributionChart from '../components/charts/CategoryDistributionChart'
 import ShopDistributionChart from '../components/charts/ShopDistributionChart'
 import ExecutiveSummary from '../components/dashboard/ExecutiveSummary'
 import KpiCard from '../components/dashboard/KpiCard'
+import MarketBrief from '../components/dashboard/MarketBrief'
 import InsightCard from '../components/InsightCard'
 
 import useMarketAnalytics from '../hooks/useMarketAnalytics'
+import { generateMarketBrief } from '../intelligence/marketBriefEngine'
+import { generateOpportunityInsights } from '../intelligence/opportunityEngine'
 
 function formatDate(dateString) {
     if (!dateString) {
@@ -29,39 +30,16 @@ function DashboardPage() {
         error,
     } = useMarketAnalytics()
 
-    const opportunityInsights = useMemo(() => {
-        if (!overview || rankedCategories.length === 0) {
-            return []
-        }
+    const opportunityInsights = generateOpportunityInsights(
+        overview,
+        rankedCategories,
+    )
 
-        return rankedCategories.slice(0, 3).map((category) => {
-            const categoryShare =
-                overview.total_products > 0
-                    ? category.product_count / overview.total_products
-                    : 0
-
-            const shopsInMarket = overview.total_shops || 0
-
-            let status = 'medium'
-            let label = 'Worth watching'
-
-            if (categoryShare >= 0.4 && shopsInMarket <= 5) {
-                status = 'high'
-                label = 'High opportunity'
-            } else if (categoryShare < 0.2) {
-                status = 'low'
-                label = 'Early signal'
-            }
-
-            return {
-                title: category.category,
-                description: `${category.product_count} tracked products • ${Math.round(
-                    categoryShare * 100,
-                )}% of the current market • ${label}`,
-                status,
-            }
-        })
-    }, [overview, rankedCategories])
+    const marketBrief = generateMarketBrief(
+        overview,
+        rankedCategories,
+        rankedShops,
+    )
 
     if (loading) {
         return <p>Loading market overview...</p>
@@ -146,6 +124,8 @@ function DashboardPage() {
                     />
                 </div>
             </section>
+
+            <MarketBrief insights={marketBrief} />
 
             <ExecutiveSummary
                 overview={overview}
