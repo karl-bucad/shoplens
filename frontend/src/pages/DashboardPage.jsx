@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 import CategoryDistributionChart from '../components/charts/CategoryDistributionChart'
 import ShopDistributionChart from '../components/charts/ShopDistributionChart'
@@ -6,11 +6,7 @@ import ExecutiveSummary from '../components/dashboard/ExecutiveSummary'
 import KpiCard from '../components/dashboard/KpiCard'
 import InsightCard from '../components/InsightCard'
 
-import {
-    getAnalyticsOverview,
-    getCategoryAnalytics,
-    getShopAnalytics,
-} from '../api/analytics'
+import useMarketAnalytics from '../hooks/useMarketAnalytics'
 
 function formatDate(dateString) {
     if (!dateString) {
@@ -25,53 +21,13 @@ function formatDate(dateString) {
 }
 
 function DashboardPage() {
-    const [overview, setOverview] = useState(null)
-    const [categories, setCategories] = useState([])
-    const [shops, setShops] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState('')
-
-    useEffect(() => {
-        async function loadOverview() {
-            try {
-                const [
-                    overviewData,
-                    categoryData,
-                    shopData,
-                ] = await Promise.all([
-                    getAnalyticsOverview(),
-                    getCategoryAnalytics(),
-                    getShopAnalytics(),
-                ])
-
-                setOverview(overviewData)
-                setCategories(categoryData)
-                setShops(shopData)
-            } catch {
-                setError('Unable to load market overview.')
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
-        loadOverview()
-    }, [])
-
-    const rankedCategories = useMemo(
-        () =>
-            [...categories].sort(
-                (a, b) => b.product_count - a.product_count,
-            ),
-        [categories],
-    )
-
-    const rankedShops = useMemo(
-        () =>
-            [...shops].sort(
-                (a, b) => b.product_count - a.product_count,
-            ),
-        [shops],
-    )
+    const {
+        overview,
+        rankedCategories,
+        rankedShops,
+        loading,
+        error,
+    } = useMarketAnalytics()
 
     const opportunityInsights = useMemo(() => {
         if (!overview || rankedCategories.length === 0) {
@@ -107,7 +63,7 @@ function DashboardPage() {
         })
     }, [overview, rankedCategories])
 
-    if (isLoading) {
+    if (loading) {
         return <p>Loading market overview...</p>
     }
 
@@ -232,7 +188,9 @@ function DashboardPage() {
 
             <section className="market-section">
                 <div className="section-header">
-                    <p className="page-eyebrow">Visual Analytics</p>
+                    <p className="page-eyebrow">
+                        Visual Analytics
+                    </p>
 
                     <h2>Market Distribution</h2>
 
@@ -256,7 +214,9 @@ function DashboardPage() {
             <section className="market-section market-two-column">
                 <div>
                     <div className="section-header">
-                        <p className="page-eyebrow">Distribution</p>
+                        <p className="page-eyebrow">
+                            Distribution
+                        </p>
 
                         <h2>Category Concentration</h2>
 
@@ -322,7 +282,9 @@ function DashboardPage() {
 
                 <div>
                     <div className="section-header">
-                        <p className="page-eyebrow">Competition</p>
+                        <p className="page-eyebrow">
+                            Competition
+                        </p>
 
                         <h2>Top Shops</h2>
 
