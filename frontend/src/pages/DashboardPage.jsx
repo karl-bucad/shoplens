@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import ExecutiveSummary from '../components/dashboard/ExecutiveSummary'
 import CategoryDistributionChart from '../components/charts/CategoryDistributionChart'
+import ShopDistributionChart from '../components/charts/ShopDistributionChart'
+import ExecutiveSummary from '../components/dashboard/ExecutiveSummary'
 import InsightCard from '../components/InsightCard'
 
 import {
@@ -220,19 +221,25 @@ function DashboardPage() {
 
             <section className="market-section">
                 <div className="section-header">
-                    <p className="page-eyebrow">Analytics</p>
+                    <p className="page-eyebrow">Visual Analytics</p>
 
-                    <h2>Category Distribution</h2>
+                    <h2>Market Distribution</h2>
 
                     <p>
-                        Explore how products are distributed across categories
-                        in your latest market snapshot.
+                        Compare category concentration and shop presence across
+                        your latest snapshot.
                     </p>
                 </div>
 
-                <CategoryDistributionChart
-                    categories={rankedCategories}
-                />
+                <div className="market-charts-grid">
+                    <CategoryDistributionChart
+                        categories={rankedCategories}
+                    />
+
+                    <ShopDistributionChart
+                        shops={rankedShops}
+                    />
+                </div>
             </section>
 
             <section className="market-section market-two-column">
