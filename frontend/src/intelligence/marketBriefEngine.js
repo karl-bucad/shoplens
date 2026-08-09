@@ -8,7 +8,11 @@ export function generateMarketBrief(
         rankedCategories.length === 0 ||
         rankedShops.length === 0
     ) {
-        return []
+        return {
+            summary: '',
+            insights: [],
+            opportunity: '',
+        }
     }
 
     const topCategory = rankedCategories[0]
@@ -31,13 +35,19 @@ export function generateMarketBrief(
         competition = 'moderate'
     }
 
+    const topThreeProductCount = rankedCategories
+        .slice(0, 3)
+        .reduce(
+            (sum, category) =>
+                sum + category.product_count,
+            0,
+        )
+
     const concentration =
-        rankedCategories
-            .slice(0, 3)
-            .reduce(
-                (sum, category) => sum + category.product_count,
-                0,
-            ) / overview.total_products
+        overview.total_products > 0
+            ? topThreeProductCount /
+            overview.total_products
+            : 0
 
     const marketStructure =
         concentration >= 0.75
@@ -46,7 +56,7 @@ export function generateMarketBrief(
                 ? 'moderately concentrated'
                 : 'well diversified'
 
-    return [
+    const insights = [
         {
             title: 'Category Leader',
             text: `${topCategory.category} represents approximately ${categoryShare}% of tracked products, making it the largest category in this snapshot.`,
@@ -64,4 +74,30 @@ export function generateMarketBrief(
             text: `Based on category distribution, the marketplace is ${marketStructure}.`,
         },
     ]
+
+    const summary =
+        `${topCategory.category} leads the current market snapshot with approximately ${categoryShare}% of tracked products. ` +
+        `${topShop.shop_name} has the largest individual shop presence, while overall competition appears ${competition}. ` +
+        `Across ${overview.total_categories} categories and ${overview.total_shops} active shops, the marketplace is currently ${marketStructure}.`
+
+    let opportunity
+
+    if (competition === 'low') {
+        opportunity =
+            `Competition is currently limited, which may indicate room to research additional products in ${topCategory.category} and other underrepresented categories before the market becomes more crowded.`
+    } else if (
+        competition === 'moderate'
+    ) {
+        opportunity =
+            `Competition is moderate, so the strongest opportunities are likely to come from identifying categories with strong demand signals but fewer established shops.`
+    } else {
+        opportunity =
+            `Competition is high, so product selection should prioritize differentiated opportunities with strong ShopLens Scores and less concentrated category competition.`
+    }
+
+    return {
+        summary,
+        insights,
+        opportunity,
+    }
 }

@@ -125,7 +125,7 @@ function DashboardPage() {
                 </div>
             </section>
 
-            <MarketBrief insights={marketBrief} />
+            <MarketBrief brief={marketBrief} />
 
             <ExecutiveSummary
                 overview={overview}

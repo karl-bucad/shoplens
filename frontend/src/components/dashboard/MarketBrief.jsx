@@ -1,16 +1,12 @@
-function MarketBrief({ insights }) {
-    if (insights.length === 0) {
+function MarketBrief({ brief }) {
+    if (
+        !brief ||
+        !brief.summary ||
+        !Array.isArray(brief.insights) ||
+        brief.insights.length === 0
+    ) {
         return null
     }
-
-    const summary = insights
-        .map((insight) => insight.text)
-        .join(' ')
-
-    const opportunityInsight =
-        insights.find((insight) =>
-            insight.title.toLowerCase().includes('competition')
-        ) ?? insights[insights.length - 1]
 
     return (
         <section className="market-section">
@@ -35,7 +31,7 @@ function MarketBrief({ insights }) {
                     </span>
 
                     <p>
-                        {summary}
+                        {brief.summary}
                     </p>
                 </div>
 
@@ -47,7 +43,7 @@ function MarketBrief({ insights }) {
                     </div>
 
                     <div className="market-brief-insight-list">
-                        {insights.map((insight) => (
+                        {brief.insights.map((insight) => (
                             <div
                                 className="market-brief-insight"
                                 key={insight.title}
@@ -74,7 +70,7 @@ function MarketBrief({ insights }) {
                     </span>
 
                     <p>
-                        {opportunityInsight.text}
+                        {brief.opportunity}
                     </p>
                 </div>
             </div>
