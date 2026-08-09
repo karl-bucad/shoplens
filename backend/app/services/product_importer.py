@@ -30,6 +30,7 @@ def import_products_from_rows(
 
         product = Product(
             user_id=user_id,
+            import_job_id=import_job.id,
             name=name,
             shop_name=shop_name or None,
             category=category or None,

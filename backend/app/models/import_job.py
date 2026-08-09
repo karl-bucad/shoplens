@@ -1,7 +1,15 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Integer, String, Text, func
+from sqlalchemy import (
+    DateTime,
+    Enum as SqlEnum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -17,10 +25,16 @@ class ImportStatus(str, Enum):
 class ImportJob(Base):
     __tablename__ = "import_jobs"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        index=True,
+    )
 
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
+        ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
         index=True,
     )
@@ -34,7 +48,10 @@ class ImportJob(Base):
         SqlEnum(
             ImportStatus,
             name="import_status",
-            values_callable=lambda enum_class: [item.value for item in enum_class],
+            values_callable=lambda enum_class: [
+                item.value
+                for item in enum_class
+            ],
         ),
         default=ImportStatus.PENDING,
         nullable=False,
@@ -77,4 +94,9 @@ class ImportJob(Base):
     user = relationship(
         "User",
         back_populates="import_jobs",
+    )
+
+    products = relationship(
+        "Product",
+        back_populates="import_job",
     )

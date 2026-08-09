@@ -9,11 +9,26 @@ from app.db.base import Base
 class Product(Base):
     __tablename__ = "products"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
+        index=True,
+    )
 
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
+        ForeignKey(
+            "users.id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
+        index=True,
+    )
+
+    import_job_id: Mapped[int | None] = mapped_column(
+        ForeignKey(
+            "import_jobs.id",
+            ondelete="SET NULL",
+        ),
+        nullable=True,
         index=True,
     )
 
@@ -38,4 +53,12 @@ class Product(Base):
         nullable=False,
     )
 
-    user = relationship("User", back_populates="products")
+    user = relationship(
+        "User",
+        back_populates="products",
+    )
+
+    import_job = relationship(
+        "ImportJob",
+        back_populates="products",
+    )
