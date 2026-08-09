@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
     getAnalyticsOverview,
     getCategoryAnalytics,
+    getMarketComparison,
     getShopAnalytics,
 } from '../api/analytics'
 
@@ -10,6 +11,8 @@ export default function useMarketAnalytics() {
     const [overview, setOverview] = useState(null)
     const [categories, setCategories] = useState([])
     const [shops, setShops] = useState([])
+    const [comparison, setComparison] = useState(null)
+
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -20,15 +23,18 @@ export default function useMarketAnalytics() {
                     overviewData,
                     categoryData,
                     shopData,
+                    comparisonData,
                 ] = await Promise.all([
                     getAnalyticsOverview(),
                     getCategoryAnalytics(),
                     getShopAnalytics(),
+                    getMarketComparison(),
                 ])
 
                 setOverview(overviewData)
                 setCategories(categoryData)
                 setShops(shopData)
+                setComparison(comparisonData)
             } catch {
                 setError('Unable to load market overview.')
             } finally {
@@ -59,6 +65,7 @@ export default function useMarketAnalytics() {
         overview,
         rankedCategories,
         rankedShops,
+        comparison,
         loading,
         error,
     }

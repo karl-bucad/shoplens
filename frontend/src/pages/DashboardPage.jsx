@@ -1,6 +1,7 @@
 import CategoryDistributionChart from '../components/charts/CategoryDistributionChart'
 import ShopDistributionChart from '../components/charts/ShopDistributionChart'
 import ExecutiveSummary from '../components/dashboard/ExecutiveSummary'
+import HistoricalTrends from '../components/dashboard/HistoricalTrends'
 import KpiCard from '../components/dashboard/KpiCard'
 import MarketBrief from '../components/dashboard/MarketBrief'
 import InsightCard from '../components/InsightCard'
@@ -26,6 +27,7 @@ function DashboardPage() {
         overview,
         rankedCategories,
         rankedShops,
+        comparison,
         loading,
         error,
     } = useMarketAnalytics()
@@ -131,6 +133,8 @@ function DashboardPage() {
                 overview={overview}
                 rankedCategories={rankedCategories}
             />
+
+            <HistoricalTrends comparison={comparison} />
 
             <section className="market-section">
                 <div className="section-header">

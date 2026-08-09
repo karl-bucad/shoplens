@@ -2411,3 +2411,66 @@ button {
       padding: var(--space-5);
   }
 }
+
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.trend-card {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.trend-label {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.trend-value {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--color-text);
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.trend-change {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.trend-positive {
+  color: var(--color-success);
+}
+
+.trend-negative {
+  color: var(--color-danger);
+}
+
+.trend-neutral {
+  color: var(--color-text-muted);
+}
+
+.trend-card p {
+  margin: var(--space-3) 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 800px) {
+  .trend-grid {
+    grid-template-columns: 1fr;
+  }
+}
