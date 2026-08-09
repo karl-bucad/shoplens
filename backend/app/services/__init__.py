@@ -31,3 +31,5 @@ from .analytics_service import (
     get_shop_analytics,
     get_import_analytics,
 )
+
+from app.services.market_comparison import get_market_comparison
