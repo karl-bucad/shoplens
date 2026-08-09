@@ -16,11 +16,25 @@ TEST_PASSWORD = "password123"
 
 def clear_test_data() -> None:
     with SessionLocal() as db:
-        user = db.query(User).filter(User.email == TEST_EMAIL).first()
+        user = (
+            db.query(User)
+            .filter(User.email == TEST_EMAIL)
+            .first()
+        )
 
         if user is not None:
-            db.execute(delete(Product).where(Product.user_id == user.id))
-            db.execute(delete(ImportJob).where(ImportJob.user_id == user.id))
+            db.execute(
+                delete(Product).where(
+                    Product.user_id == user.id,
+                )
+            )
+
+            db.execute(
+                delete(ImportJob).where(
+                    ImportJob.user_id == user.id,
+                )
+            )
+
             db.delete(user)
             db.commit()
 
@@ -51,9 +65,14 @@ def register_and_get_token() -> str:
 
 def test_authenticated_user_can_view_analytics_overview() -> None:
     clear_test_data()
-    token = register_and_get_token()
-    headers = {"Authorization": f"Bearer {token}"}
 
+    token = register_and_get_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
+
+    # These products are created manually and should not
+    # be included in latest-snapshot analytics.
     first_response = client.post(
         "/products",
         headers=headers,
@@ -88,6 +107,7 @@ def test_authenticated_user_can_view_analytics_overview() -> None:
     assert second_response.status_code == 201
     assert third_response.status_code == 201
 
+    # This import becomes the latest market snapshot.
     import_response = client.post(
         "/imports/csv",
         headers=headers,
@@ -112,9 +132,9 @@ def test_authenticated_user_can_view_analytics_overview() -> None:
 
     data = response.json()
 
-    assert data["total_products"] == 4
-    assert data["total_shops"] == 3
-    assert data["total_categories"] == 3
+    assert data["total_products"] == 1
+    assert data["total_shops"] == 1
+    assert data["total_categories"] == 1
     assert data["latest_import"] is not None
 
     clear_test_data()
@@ -122,11 +142,14 @@ def test_authenticated_user_can_view_analytics_overview() -> None:
 
 def test_empty_analytics_overview_returns_zero_counts() -> None:
     clear_test_data()
+
     token = register_and_get_token()
 
     response = client.get(
         "/analytics/overview",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
     )
 
     assert response.status_code == 200
@@ -145,41 +168,32 @@ def test_unauthenticated_user_cannot_view_analytics_overview() -> None:
     response = client.get("/analytics/overview")
 
     assert response.status_code == 401
-    
+
+
 def test_authenticated_user_can_view_category_analytics() -> None:
     clear_test_data()
+
     token = register_and_get_token()
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
 
-    client.post(
-        "/products",
+    import_response = client.post(
+        "/imports/csv",
         headers=headers,
-        json={
-            "name": "Product One",
-            "shop_name": "Shop One",
-            "category": "Beauty",
+        files={
+            "file": (
+                "category-analytics.csv",
+                "name,shop_name,category\n"
+                "Product One,Shop One,Beauty\n"
+                "Product Two,Shop Two,Beauty\n"
+                "Product Three,Shop Three,Fitness\n",
+                "text/csv",
+            )
         },
     )
 
-    client.post(
-        "/products",
-        headers=headers,
-        json={
-            "name": "Product Two",
-            "shop_name": "Shop Two",
-            "category": "Beauty",
-        },
-    )
-
-    client.post(
-        "/products",
-        headers=headers,
-        json={
-            "name": "Product Three",
-            "shop_name": "Shop Three",
-            "category": "Fitness",
-        },
-    )
+    assert import_response.status_code == 201
 
     response = client.get(
         "/analytics/categories",
@@ -206,11 +220,14 @@ def test_authenticated_user_can_view_category_analytics() -> None:
 
 def test_empty_category_analytics_returns_empty_list() -> None:
     clear_test_data()
+
     token = register_and_get_token()
 
     response = client.get(
         "/analytics/categories",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
     )
 
     assert response.status_code == 200
@@ -223,41 +240,32 @@ def test_unauthenticated_user_cannot_view_category_analytics() -> None:
     response = client.get("/analytics/categories")
 
     assert response.status_code == 401
-    
+
+
 def test_authenticated_user_can_view_shop_analytics() -> None:
     clear_test_data()
+
     token = register_and_get_token()
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
 
-    client.post(
-        "/products",
+    import_response = client.post(
+        "/imports/csv",
         headers=headers,
-        json={
-            "name": "Product One",
-            "shop_name": "GlowTech",
-            "category": "Home",
+        files={
+            "file": (
+                "shop-analytics.csv",
+                "name,shop_name,category\n"
+                "Product One,GlowTech,Home\n"
+                "Product Two,GlowTech,Beauty\n"
+                "Product Three,BeautyLab,Beauty\n",
+                "text/csv",
+            )
         },
     )
 
-    client.post(
-        "/products",
-        headers=headers,
-        json={
-            "name": "Product Two",
-            "shop_name": "GlowTech",
-            "category": "Beauty",
-        },
-    )
-
-    client.post(
-        "/products",
-        headers=headers,
-        json={
-            "name": "Product Three",
-            "shop_name": "BeautyLab",
-            "category": "Beauty",
-        },
-    )
+    assert import_response.status_code == 201
 
     response = client.get(
         "/analytics/shops",
@@ -284,11 +292,14 @@ def test_authenticated_user_can_view_shop_analytics() -> None:
 
 def test_empty_shop_analytics_returns_empty_list() -> None:
     clear_test_data()
+
     token = register_and_get_token()
 
     response = client.get(
         "/analytics/shops",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
     )
 
     assert response.status_code == 200
@@ -301,11 +312,15 @@ def test_unauthenticated_user_cannot_view_shop_analytics() -> None:
     response = client.get("/analytics/shops")
 
     assert response.status_code == 401
-    
+
+
 def test_authenticated_user_can_view_import_analytics() -> None:
     clear_test_data()
+
     token = register_and_get_token()
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = {
+        "Authorization": f"Bearer {token}",
+    }
 
     first_response = client.post(
         "/imports/csv",
@@ -354,11 +369,14 @@ def test_authenticated_user_can_view_import_analytics() -> None:
 
 def test_empty_import_analytics_returns_empty_list() -> None:
     clear_test_data()
+
     token = register_and_get_token()
 
     response = client.get(
         "/analytics/imports",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
     )
 
     assert response.status_code == 200
