@@ -103,7 +103,9 @@ function ImportsPage() {
         setIsUploading(true)
 
         try {
-            const newImport = await uploadProductCsv(selectedFile)
+            const newImport = await uploadProductCsv(
+                selectedFile,
+            )
 
             setImportJobs((currentJobs) => [
                 {
@@ -111,7 +113,8 @@ function ImportsPage() {
                     filename: newImport.filename,
                     status: newImport.status,
                     total_rows: newImport.total_rows,
-                    successful_rows: newImport.successful_rows,
+                    successful_rows:
+                        newImport.successful_rows,
                     failed_rows: newImport.failed_rows,
                     created_at: new Date().toISOString(),
                     completed_at:
@@ -123,10 +126,9 @@ function ImportsPage() {
             ])
 
             clearSelection()
-            event.target.reset()
 
-            toast.success('CSV imported', {
-                description: `${newImport.successful_rows} products were imported successfully.`,
+            toast.success('Market snapshot created', {
+                description: `${newImport.successful_rows} products were imported into the new snapshot.`,
             })
         } catch (requestError) {
             const message =
@@ -165,8 +167,8 @@ function ImportsPage() {
                     <h1>Imports</h1>
 
                     <p>
-                        Review and validate CSV market data before importing it
-                        into ShopLens.
+                        Upload, validate, and create structured
+                        market snapshots for ShopLens analytics.
                     </p>
                 </div>
             </div>
@@ -180,36 +182,27 @@ function ImportsPage() {
                     <h2>Choose Product CSV</h2>
 
                     <p>
-                        Select a CSV containing product name, shop, and category
-                        data.
+                        Select a CSV containing product name,
+                        shop, and category data.
                     </p>
                 </div>
 
-                <form
-                    className="upload-form"
-                    onSubmit={handleUpload}
-                >
+                <div className="upload-form">
                     <input
                         type="file"
                         accept=".csv,text/csv"
                         onChange={handleFileChange}
                     />
+                </div>
 
-                    <button
-                        type="submit"
-                        disabled={!canImport || isUploading}
-                    >
-                        {isUploading
-                            ? 'Importing...'
-                            : selectedFile
-                                ? 'Import Reviewed CSV'
-                                : 'Choose CSV First'}
-                    </button>
-                </form>
-
-                {selectedFile && (
-                    <p className="selected-file">
-                        Selected: {selectedFile.name}
+                {selectedFile ? (
+                    <div className="selected-file">
+                        <strong>Selected file</strong>
+                        <span>{selectedFile.name}</span>
+                    </div>
+                ) : (
+                    <p className="upload-helper">
+                        Choose a CSV to begin validation.
                     </p>
                 )}
             </section>
@@ -220,24 +213,59 @@ function ImportsPage() {
                 issues={issues}
             />
 
-            <section className="analytics-section">
+            {selectedFile && (
+                <section className="snapshot-action-card">
+                    <div>
+                        <p className="page-eyebrow">
+                            Step 3
+                        </p>
+
+                        <h2>Create Market Snapshot</h2>
+
+                        <p>
+                            Import the reviewed CSV as the newest
+                            ShopLens snapshot. Dashboard analytics
+                            will use this snapshot as the current
+                            market.
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleUpload}>
+                        <button
+                            className="snapshot-import-button"
+                            type="submit"
+                            disabled={
+                                !canImport || isUploading
+                            }
+                        >
+                            {isUploading
+                                ? 'Creating snapshot...'
+                                : canImport
+                                    ? 'Create Market Snapshot'
+                                    : 'Resolve Validation Issues'}
+                        </button>
+                    </form>
+                </section>
+            )}
+
+            <section className="analytics-section import-history-section">
                 <div className="section-header">
                     <p className="page-eyebrow">
-                        History
+                        Snapshot History
                     </p>
 
-                    <h2>Import History</h2>
+                    <h2>Previous Imports</h2>
 
                     <p>
-                        Review previous market snapshot uploads and their
-                        results.
+                        Review previous market snapshots and
+                        their import results.
                     </p>
                 </div>
 
                 <div className="table-card">
                     {importJobs.length === 0 ? (
                         <p className="empty-state">
-                            No imports have been completed yet.
+                            No market snapshots have been created yet.
                         </p>
                     ) : (
                         <div className="table-wrapper">
@@ -246,7 +274,7 @@ function ImportsPage() {
                                     <tr>
                                         <th>Filename</th>
                                         <th>Status</th>
-                                        <th>Total Rows</th>
+                                        <th>Products</th>
                                         <th>Successful</th>
                                         <th>Failed</th>
                                         <th>Created</th>
@@ -264,14 +292,29 @@ function ImportsPage() {
                                                 <span
                                                     className={`status-badge status-${job.status}`}
                                                 >
-                                                    {getStatusLabel(job.status)}
+                                                    {getStatusLabel(
+                                                        job.status,
+                                                    )}
                                                 </span>
                                             </td>
 
-                                            <td>{job.total_rows}</td>
-                                            <td>{job.successful_rows}</td>
-                                            <td>{job.failed_rows}</td>
-                                            <td>{formatDate(job.created_at)}</td>
+                                            <td>
+                                                {job.total_rows}
+                                            </td>
+
+                                            <td>
+                                                {job.successful_rows}
+                                            </td>
+
+                                            <td>
+                                                {job.failed_rows}
+                                            </td>
+
+                                            <td>
+                                                {formatDate(
+                                                    job.created_at,
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
