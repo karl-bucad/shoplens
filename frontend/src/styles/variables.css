@@ -2,12 +2,13 @@
     /* Brand */
 
     --color-primary: #7c3aed;
-    --color-secondary: #ec4899;
+    --color-primary-hover: #6d28d9;
+    --color-secondary: #c026d3;
     --color-accent: #a78bfa;
 
     /* Surfaces */
 
-    --color-background: #fafafa;
+    --color-background: #fbfaff;
     --color-surface: #ffffff;
     --color-surface-hover: #f5f3ff;
 

@@ -313,7 +313,7 @@ button {
 .search-bar input:focus {
   outline: none;
   border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
 .table-controls {
@@ -337,7 +337,7 @@ button {
 .filter-group select:focus {
   outline: none;
   border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
 .pagination-info {
@@ -394,7 +394,7 @@ button {
 }
 
 .view-button:hover {
-  background: #bfdbfe;
+  background: #ddd6fe;
 }
 
 .edit-button {
@@ -473,9 +473,6 @@ button {
 
 .close-button:hover {
   opacity: 0.9;
-}
-
-.close-button:hover {
   background: #6d28d9;
 }
 
@@ -501,7 +498,7 @@ button {
 .form-group input:focus {
   outline: none;
   border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
 }
 
 .modal-actions button:disabled {
@@ -1561,27 +1558,6 @@ button {
       var(--color-primary),
       var(--color-accent),
       var(--color-secondary));
-}
-
-.score-total {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 22px;
-  padding: 16px 0;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.score-total span {
-  color: #64748b;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.score-total strong {
-  color: #0f172a;
-  font-size: 1rem;
 }
 
 .market-metric small {
@@ -2807,7 +2783,7 @@ button {
 .login-field input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
 }
 
 .login-error {
@@ -3112,8 +3088,8 @@ button {
   border-radius: var(--radius-lg);
   background:
     linear-gradient(135deg,
-      rgba(59, 130, 246, 0.10),
-      rgba(15, 23, 42, 0.04));
+    rgba(124, 58, 237, 0.10),
+    rgba(236, 72, 153, 0.06));
   color: var(--color-primary);
   font-size: 1.5rem;
   font-weight: 800;
