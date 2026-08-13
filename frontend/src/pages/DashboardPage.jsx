@@ -9,6 +9,7 @@ import InsightCard from '../components/InsightCard'
 import useMarketAnalytics from '../hooks/useMarketAnalytics'
 import { generateMarketBrief } from '../intelligence/marketBriefEngine'
 import { generateOpportunityInsights } from '../intelligence/opportunityEngine'
+import { Link } from 'react-router-dom'
 
 function formatDate(dateString) {
     if (!dateString) {
@@ -53,6 +54,59 @@ function DashboardPage() {
                 <h2>Unable to load market overview</h2>
                 <p>{error || 'No overview data available.'}</p>
             </div>
+        )
+    }
+
+    if (overview.total_products === 0) {
+        return (
+            <>
+                <div className="page-header market-page-header">
+                    <div>
+                        <p className="page-eyebrow">
+                            Market Intelligence
+                        </p>
+
+                        <h1>Market Overview</h1>
+
+                        <p>
+                            See where products, shops, and categories are
+                            concentrated across your latest TikTok Shop snapshot.
+                        </p>
+                    </div>
+
+                    <div className="snapshot-date">
+                        <span>Latest snapshot</span>
+                        <strong>No snapshots yet</strong>
+                    </div>
+                </div>
+
+                <section className="first-snapshot-empty">
+                    <div className="first-snapshot-empty-icon">
+                        ◎
+                    </div>
+
+                    <div>
+                        <p className="page-eyebrow">
+                            Get Started
+                        </p>
+
+                        <h2>No market data yet</h2>
+
+                        <p>
+                            Import your first market snapshot to unlock
+                            analytics, historical trends, shop rankings,
+                            and product opportunity signals.
+                        </p>
+
+                        <Link
+                            className="first-snapshot-button"
+                            to="/imports"
+                        >
+                            Import Market Snapshot
+                        </Link>
+                    </div>
+                </section>
+            </>
         )
     }
 

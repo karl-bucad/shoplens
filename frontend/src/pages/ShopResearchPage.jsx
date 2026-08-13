@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 import KpiCard from '../components/dashboard/KpiCard'
 
 import useMarketAnalytics from '../hooks/useMarketAnalytics'
@@ -20,6 +22,55 @@ function ShopResearchPage() {
                 <h2>Unable to load shop research</h2>
                 <p>{error || 'No market data available.'}</p>
             </div>
+        )
+    }
+
+    if (overview.total_products === 0) {
+        return (
+            <>
+                <div className="page-header market-page-header">
+                    <div>
+                        <p className="page-eyebrow">
+                            Competition Research
+                        </p>
+
+                        <h1>Shop Research</h1>
+
+                        <p>
+                            Compare shops in your latest market
+                            snapshot and understand where product
+                            concentration is strongest.
+                        </p>
+                    </div>
+                </div>
+
+                <section className="first-snapshot-empty">
+                    <div className="first-snapshot-empty-icon">
+                        ◫
+                    </div>
+
+                    <div>
+                        <p className="page-eyebrow">
+                            Get Started
+                        </p>
+
+                        <h2>No shops to analyze yet</h2>
+
+                        <p>
+                            Import your first market snapshot to
+                            start comparing shop presence, market
+                            share, and competitive concentration.
+                        </p>
+
+                        <Link
+                            className="first-snapshot-button"
+                            to="/imports"
+                        >
+                            Import Market Snapshot
+                        </Link>
+                    </div>
+                </section>
+            </>
         )
     }
 
@@ -136,74 +187,62 @@ function ShopResearchPage() {
                 </div>
 
                 <div className="research-panel">
-                    {rankedShops.length === 0 ? (
-                        <div className="empty-research-state">
-                            <h2>No shop data available</h2>
+                    {rankedShops.map((shop, index) => {
+                        const relativePresence =
+                            largestShopCount > 0
+                                ? (
+                                    shop.product_count /
+                                    largestShopCount
+                                ) * 100
+                                : 0
 
-                            <p>
-                                Import a market snapshot containing
-                                shop data to begin comparing
-                                competitors.
-                            </p>
-                        </div>
-                    ) : (
-                        rankedShops.map((shop, index) => {
-                            const relativePresence =
-                                largestShopCount > 0
-                                    ? (
+                        const marketShare =
+                            overview.total_products > 0
+                                ? Math.round(
+                                    (
                                         shop.product_count /
-                                        largestShopCount
-                                    ) * 100
-                                    : 0
+                                        overview.total_products
+                                    ) * 100,
+                                )
+                                : 0
 
-                            const marketShare =
-                                overview.total_products > 0
-                                    ? Math.round(
-                                        (
-                                            shop.product_count /
-                                            overview.total_products
-                                        ) * 100,
-                                    )
-                                    : 0
+                        return (
+                            <div
+                                className="ranking-row"
+                                key={shop.shop_name}
+                            >
+                                <div className="ranking-position">
+                                    #{index + 1}
+                                </div>
 
-                            return (
-                                <div
-                                    className="ranking-row"
-                                    key={shop.shop_name}
-                                >
-                                    <div className="ranking-position">
-                                        #{index + 1}
+                                <div className="ranking-content">
+                                    <div className="ranking-label">
+                                        <strong>
+                                            {shop.shop_name}
+                                        </strong>
+
+                                        <span>
+                                            {shop.product_count}{' '}
+                                            {shop.product_count === 1
+                                                ? 'product'
+                                                : 'products'}
+                                            {' • '}
+                                            {marketShare}% of market
+                                        </span>
                                     </div>
 
-                                    <div className="ranking-content">
-                                        <div className="ranking-label">
-                                            <strong>
-                                                {shop.shop_name}
-                                            </strong>
-
-                                            <span>
-                                                {shop.product_count}{' '}
-                                                {shop.product_count === 1
-                                                    ? 'product'
-                                                    : 'products'}
-                                                {' • '}
-                                                {marketShare}% of market
-                                            </span>
-                                        </div>
-
-                                        <div className="research-track">
-                                            <div
-                                                className="research-bar"
-                                                style={{
-                                                    width: `${relativePresence}%`,
-                                                }}
-                                            />
-                                        </div>
+                                    <div className="research-track">
+                                        <div
+                                            className="research-bar"
+                                            style={{
+                                                width: `${relativePresence}%`,
+                                            }}
+                                        />
                                     </div>
                                 </div>
-                            )
-                        })
-                    )}
+                            </div>
+                        )
+                    })}
                 </div>
             </section>
         </>
