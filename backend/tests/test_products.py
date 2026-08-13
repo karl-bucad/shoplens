@@ -118,6 +118,77 @@ def test_authenticated_user_can_list_products() -> None:
     clear_test_data()
 
 
+def test_authenticated_user_can_list_latest_snapshot_products() -> None:
+    clear_test_data()
+
+    token = register_and_get_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    manual_response = client.post(
+        "/products",
+        headers=headers,
+        json={
+            "name": "Manual Product",
+            "shop_name": "Manual Shop",
+            "category": "Manual",
+        },
+    )
+
+    assert manual_response.status_code == 201
+
+    first_import = client.post(
+        "/imports/csv",
+        headers=headers,
+        files={
+            "file": (
+                "first-snapshot.csv",
+                "name,shop_name,category\n"
+                "Old Product,Old Shop,Beauty\n",
+                "text/csv",
+            )
+        },
+    )
+
+    assert first_import.status_code == 201
+
+    second_import = client.post(
+        "/imports/csv",
+        headers=headers,
+        files={
+            "file": (
+                "latest-snapshot.csv",
+                "name,shop_name,category\n"
+                "Latest Product One,Latest Shop,Home\n"
+                "Latest Product Two,Latest Shop,Fitness\n",
+                "text/csv",
+            )
+        },
+    )
+
+    assert second_import.status_code == 201
+
+    response = client.get(
+        "/products/latest",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+
+    products = response.json()
+
+    assert len(products) == 2
+
+    assert {
+        product["name"]
+        for product in products
+    } == {
+        "Latest Product One",
+        "Latest Product Two",
+    }
+
+    clear_test_data()
+
+
 def test_unauthenticated_user_cannot_access_products() -> None:
     create_response = client.post(
         "/products",

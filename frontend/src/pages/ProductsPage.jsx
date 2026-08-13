@@ -10,7 +10,7 @@ import ProductFilters from '../components/ProductFilters'
 import ProductsPagination from '../components/ProductsPagination'
 
 import { deleteProduct } from '../api/deleteProduct'
-import { getProducts } from '../api/products'
+import { getLatestProducts } from '../api/products'
 import { updateProduct } from '../api/updateProduct'
 
 import useProductDiscovery from '../hooks/useProductDiscovery'
@@ -59,7 +59,7 @@ function ProductsPage() {
     useEffect(() => {
         async function loadProducts() {
             try {
-                const data = await getProducts()
+                const data = await getLatestProducts()
                 setProducts(data)
             } catch {
                 setError('Unable to load product discovery data.')

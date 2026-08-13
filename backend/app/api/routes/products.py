@@ -11,6 +11,7 @@ from app.schemas.product import (
 )
 from app.services.product_service import (
     create_product,
+    get_latest_products_by_user,
     get_products_by_user,
     update_product,
     delete_product,
@@ -49,6 +50,19 @@ def read_products(
     db: Session = Depends(get_db),
 ) -> list[ProductResponse]:
     return get_products_by_user(
+        db=db,
+        user_id=current_user.id,
+    )
+    
+@router.get(
+    "/latest",
+    response_model=list[ProductResponse],
+)
+def read_latest_products(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[ProductResponse]:
+    return get_latest_products_by_user(
         db=db,
         user_id=current_user.id,
     )
