@@ -31,7 +31,7 @@ button {
 }
 
 .sidebar {
-  background: #111827;
+  background: #17131f;
   color: white;
   padding: 32px 24px;
   display: flex;
@@ -60,7 +60,12 @@ button {
 }
 
 .sidebar a.active {
-  background: #2563eb;
+  background: linear-gradient(
+    135deg,
+    #7c3aed,
+    #9333ea
+  );
+  color: #ffffff;
 }
 
 .content {
@@ -81,11 +86,15 @@ button {
 }
 
 .topbar button {
-  background: #2563eb;
+  background: #7c3aed;
   color: white;
   border: none;
   padding: 10px 18px;
   border-radius: 8px;
+}
+
+.topbar button:hover {
+  background: #6d28d9;
 }
 
 .page-content {
@@ -218,7 +227,7 @@ button {
 .category-bar {
   height: 100%;
   min-width: 4px;
-  background: #2563eb;
+  background: #7c3aed;
   border-radius: 999px;
 }
 
@@ -280,8 +289,8 @@ button {
 .category-badge {
   display: inline-flex;
   padding: 5px 10px;
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #ede9fe;
+  color: #6d28d9;
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -303,7 +312,7 @@ button {
 
 .search-bar input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #7c3aed;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
@@ -327,7 +336,7 @@ button {
 
 .filter-group select:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #7c3aed;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
@@ -349,14 +358,14 @@ button {
   padding: 10px 18px;
   border: none;
   border-radius: 8px;
-  background: #2563eb;
+  background: #7c3aed;
   color: white;
   cursor: pointer;
   font-weight: 600;
 }
 
 .pagination button:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: #6d28d9;
 }
 
 .pagination button:disabled {
@@ -380,8 +389,8 @@ button {
 }
 
 .view-button {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #ede9fe;
+  color: #6d28d9;
 }
 
 .view-button:hover {
@@ -467,7 +476,7 @@ button {
 }
 
 .close-button:hover {
-  background: #1d4ed8;
+  background: #6d28d9;
 }
 
 .form-group {
@@ -491,7 +500,7 @@ button {
 
 .form-group input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #7c3aed;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
@@ -529,13 +538,13 @@ button {
   border: none;
   border-radius: 8px;
   padding: 11px 18px;
-  background: #2563eb;
+  background: #7c3aed;
   color: white;
   font-weight: 600;
 }
 
 .upload-form button:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: #6d28d9;
 }
 
 .upload-form button:disabled {
@@ -782,7 +791,7 @@ button {
 .snapshot-date {
   min-width: 150px;
   padding: 14px 18px;
-  border-left: 2px solid #2563eb;
+  border-left: 2px solid #7c3aed;
   background: white;
 }
 
@@ -896,7 +905,7 @@ button {
 
 .research-bar {
   height: 100%;
-  background: #2563eb;
+  background: #7c3aed;
   border-radius: 999px;
 }
 
@@ -919,8 +928,8 @@ button {
   height: 30px;
   flex: 0 0 30px;
   border-radius: 8px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: #f5f3ff;
+  color: #7c3aed;
   font-size: 0.8rem;
   font-weight: 800;
 }
@@ -991,7 +1000,7 @@ button {
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: #0f172a;
+  background: #18141f;
   color: white;
   font-size: 0.85rem;
   font-weight: 800;
@@ -1132,14 +1141,10 @@ button {
   border-color: var(--color-primary);
 }
 
-.analyze-button:hover {
-  border-color: #25f4ee;
-}
-
 .discovery-summary {
   min-width: 150px;
   padding: 14px 18px;
-  border-left: 2px solid #25f4ee;
+  border-left: 2px solid #7c3aed;
   background: white;
 }
 
@@ -1329,8 +1334,8 @@ button {
   height: 20px;
   flex: 0 0 20px;
   border-radius: 999px;
-  background: rgba(37, 244, 238, 0.14);
-  color: #0f766e;
+  background: rgba(124, 58, 237, 0.12);
+  color: #6d28d9;
   font-size: 0.72rem;
   font-weight: 800;
 }
@@ -1395,11 +1400,6 @@ button {
   color: var(--color-text);
 }
 
-.intelligence-close:hover {
-  border-color: #25f4ee;
-  color: #0f172a;
-}
-
 .product-intelligence-meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1432,12 +1432,11 @@ button {
 .product-intelligence-note {
   margin-top: 20px;
   padding: 18px;
-  border: 1px solid rgba(37, 244, 238, 0.35);
-  border-radius: 14px;
+  border: 1px solid rgba(124, 58, 237, 0.28);
   background:
     linear-gradient(135deg,
-      rgba(37, 244, 238, 0.06),
-      rgba(254, 44, 85, 0.04));
+    rgba(124, 58, 237, 0.06),
+    rgba(236, 72, 153, 0.05));
 }
 
 .product-intelligence-note>p:last-child {
@@ -1494,8 +1493,8 @@ button {
   border-radius: 10px;
   background:
     linear-gradient(135deg,
-      rgba(37, 244, 238, 0.16),
-      rgba(254, 44, 85, 0.1));
+    rgba(124, 58, 237, 0.14),
+    rgba(236, 72, 153, 0.10));
   color: #0f172a;
   font-size: 0.85rem;
   font-weight: 800;
@@ -1655,7 +1654,7 @@ button {
 
 .kpi-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(37, 244, 238, 0.65);
+  border-color: rgba(139, 92, 246, 0.65);
   box-shadow: var(--shadow-md);
 }
 
@@ -1669,8 +1668,8 @@ button {
   border-radius: var(--radius-md);
   background:
     linear-gradient(135deg,
-      rgba(37, 244, 238, 0.12),
-      rgba(254, 44, 85, 0.08));
+      rgba(124, 58, 237, 0.10),
+      rgba(236, 72, 153, 0.08));
   color: var(--color-text);
   font-size: 1.1rem;
   font-weight: 800;
@@ -2625,7 +2624,7 @@ button {
   flex-direction: column;
   justify-content: space-between;
   padding: 48px;
-  background: #0f172a;
+  background: #17131f;
   color: #ffffff;
 }
 
@@ -2677,7 +2676,7 @@ button {
 }
 
 .login-brand-panel .login-eyebrow {
-  color: #60a5fa;
+  color: #a78bfa;
 }
 
 .login-hero-copy h2 {
@@ -2711,7 +2710,7 @@ button {
 }
 
 .login-feature-item>span {
-  color: #60a5fa;
+  color: #a78bfa;
   font-size: 0.75rem;
   font-weight: 800;
 }
@@ -2738,7 +2737,11 @@ button {
   display: grid;
   place-items: center;
   padding: 40px;
-  background: #f8fafc;
+  background:
+    radial-gradient(circle at 70% 35%,
+      rgba(167, 139, 250, 0.10),
+      transparent 32%),
+    #fbfaff;
 }
 
 .login-card {
@@ -2823,18 +2826,21 @@ button {
   padding: 12px 16px;
   border: none;
   border-radius: var(--radius-sm);
-  background: var(--color-primary);
+  background: linear-gradient(90deg,
+      #6d28d9 0%,
+      #7c3aed 45%,
+      #c026d3 100%);
   color: #ffffff;
   font-weight: 700;
   transition:
     transform 160ms ease,
-    background 160ms ease,
+    box-shadow 160ms ease,
     opacity 160ms ease;
 }
 
 .login-submit:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: var(--color-primary-hover);
+  box-shadow: 0 8px 22px rgba(124, 58, 237, 0.24);
 }
 
 .login-submit:disabled {
@@ -2976,14 +2982,14 @@ button {
   font-size: 1rem;
 }
 
-.csv-preview-table-header > span {
+.csv-preview-table-header>span {
   color: var(--color-text-muted);
   font-size: 0.78rem;
 }
 
 @media (max-width: 700px) {
   .csv-preview-heading {
-      flex-direction: column;
+    flex-direction: column;
   }
 }
 
@@ -3033,7 +3039,7 @@ button {
   font-size: 1.2rem;
 }
 
-.snapshot-action-card > div > p:last-child {
+.snapshot-action-card>div>p:last-child {
   max-width: 680px;
   margin: var(--space-2) 0 0;
   color: var(--color-text-secondary);
@@ -3054,9 +3060,9 @@ button {
   color: #ffffff;
   font-weight: 700;
   transition:
-      transform 160ms ease,
-      background 160ms ease,
-      opacity 160ms ease;
+    transform 160ms ease,
+    background 160ms ease,
+    opacity 160ms ease;
 }
 
 .snapshot-import-button:hover:not(:disabled) {
@@ -3075,13 +3081,13 @@ button {
 
 @media (max-width: 760px) {
   .snapshot-action-card {
-      align-items: stretch;
-      flex-direction: column;
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .snapshot-action-card form,
   .snapshot-import-button {
-      width: 100%;
+    width: 100%;
   }
 }
 
@@ -3105,11 +3111,9 @@ button {
   height: 64px;
   border-radius: var(--radius-lg);
   background:
-      linear-gradient(
-          135deg,
-          rgba(59, 130, 246, 0.10),
-          rgba(15, 23, 42, 0.04)
-      );
+    linear-gradient(135deg,
+      rgba(59, 130, 246, 0.10),
+      rgba(15, 23, 42, 0.04));
   color: var(--color-primary);
   font-size: 1.5rem;
   font-weight: 800;
@@ -3139,8 +3143,8 @@ button {
   font-size: 0.88rem;
   font-weight: 700;
   transition:
-      transform 160ms ease,
-      background 160ms ease;
+    transform 160ms ease,
+    background 160ms ease;
 }
 
 .first-snapshot-button:hover {
@@ -3150,8 +3154,8 @@ button {
 
 @media (max-width: 640px) {
   .first-snapshot-empty {
-      grid-template-columns: 1fr;
-      padding: var(--space-6);
+    grid-template-columns: 1fr;
+    padding: var(--space-6);
   }
 }
 
@@ -3180,10 +3184,10 @@ button {
   font-size: 0.86rem;
   font-weight: 700;
   transition:
-      border-color 160ms ease,
-      color 160ms ease,
-      background 160ms ease,
-      transform 160ms ease;
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
 }
 
 .sample-csv-button:hover {
@@ -3195,13 +3199,13 @@ button {
 
 @media (max-width: 640px) {
   .import-source-actions {
-      align-items: stretch;
-      flex-direction: column;
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .import-source-actions .upload-form,
   .sample-csv-button {
-      width: 100%;
+    width: 100%;
   }
 }
 
