@@ -1,22 +1,17 @@
 import { useState } from 'react'
-import {
-    Link,
-    Navigate,
-    useLocation,
-    useNavigate,
-} from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 
-import { loginUser } from '../api/auth'
+import { registerUser } from '../api/auth'
 import { useAuth } from '../context/useAuth'
 
-function LoginPage() {
-    const { login, isAuthenticated } = useAuth()
+function RegisterPage() {
+    const { isAuthenticated } = useAuth()
     const navigate = useNavigate()
-    const location = useLocation()
 
     const [formData, setFormData] = useState({
         email: '',
         password: '',
+        confirmPassword: '',
     })
 
     const [error, setError] = useState('')
@@ -33,22 +28,36 @@ function LoginPage() {
 
     async function handleSubmit(event) {
         event.preventDefault()
-
         setError('')
+
+        if (formData.password !== formData.confirmPassword) {
+            setError('Passwords do not match.')
+            return
+        }
+
+        if (formData.password.length < 8) {
+            setError('Password must be at least 8 characters.')
+            return
+        }
+
         setIsSubmitting(true)
 
         try {
-            const data = await loginUser(formData)
+            await registerUser({
+                email: formData.email,
+                password: formData.password,
+            })
 
-            login(data.access_token)
-
-            navigate('/overview', {
+            navigate('/login', {
                 replace: true,
+                state: {
+                    registered: true,
+                },
             })
         } catch (requestError) {
             const message =
                 requestError.response?.data?.detail ??
-                'Unable to log in. Please try again.'
+                'Unable to create account. Please try again.'
 
             setError(message)
         } finally {
@@ -82,17 +91,18 @@ function LoginPage() {
 
                     <div className="login-hero-copy">
                         <p className="login-eyebrow">
-                            TikTok Shop Research
+                            Start Researching
                         </p>
 
                         <h2>
-                            Turn product data into clearer market decisions.
+                            Build a clearer view of your market.
                         </h2>
 
                         <p>
-                            Research products, analyze shops,
-                            compare market snapshots, and surface
-                            opportunities from one workspace.
+                            Create an account, import a market
+                            snapshot, and turn product data into
+                            structured research and competitive
+                            insights.
                         </p>
                     </div>
 
@@ -102,12 +112,12 @@ function LoginPage() {
 
                             <div>
                                 <strong>
-                                    Product Intelligence
+                                    Import Market Data
                                 </strong>
 
                                 <p>
-                                    Identify promising products
-                                    using structured market signals.
+                                    Upload structured product data
+                                    and create reusable snapshots.
                                 </p>
                             </div>
                         </div>
@@ -117,12 +127,12 @@ function LoginPage() {
 
                             <div>
                                 <strong>
-                                    Market Analytics
+                                    Discover Opportunities
                                 </strong>
 
                                 <p>
-                                    Understand category and shop
-                                    concentration at a glance.
+                                    Compare products, categories,
+                                    and shops from one workspace.
                                 </p>
                             </div>
                         </div>
@@ -132,12 +142,12 @@ function LoginPage() {
 
                             <div>
                                 <strong>
-                                    Historical Trends
+                                    Track Market Changes
                                 </strong>
 
                                 <p>
-                                    Compare imports and see how the
-                                    market changes over time.
+                                    Compare snapshots and identify
+                                    changes over time.
                                 </p>
                             </div>
                         </div>
@@ -153,21 +163,15 @@ function LoginPage() {
                 <div className="login-card">
                     <div className="login-card-header">
                         <p className="login-eyebrow">
-                            Welcome back
+                            Get Started
                         </p>
 
-                        <h2>Sign in to ShopLens</h2>
+                        <h2>Create your account</h2>
 
                         <p>
-                            Access your market research workspace.
+                            Start exploring ShopLens market intelligence.
                         </p>
                     </div>
-
-                    {location.state?.registered && (
-                        <div className="login-success">
-                            Account created successfully. You can now sign in.
-                        </div>
-                    )}
 
                     <form
                         className="login-form"
@@ -199,10 +203,27 @@ function LoginPage() {
                                 id="password"
                                 name="password"
                                 type="password"
-                                placeholder="Enter your password"
+                                placeholder="At least 8 characters"
                                 value={formData.password}
                                 onChange={handleChange}
-                                autoComplete="current-password"
+                                autoComplete="new-password"
+                                required
+                            />
+                        </div>
+
+                        <div className="login-field">
+                            <label htmlFor="confirmPassword">
+                                Confirm Password
+                            </label>
+
+                            <input
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                type="password"
+                                placeholder="Re-enter your password"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                autoComplete="new-password"
                                 required
                             />
                         </div>
@@ -222,15 +243,15 @@ function LoginPage() {
                             disabled={isSubmitting}
                         >
                             {isSubmitting
-                                ? 'Signing in...'
-                                : 'Sign in'}
+                                ? 'Creating account...'
+                                : 'Create account'}
                         </button>
                     </form>
 
                     <p className="auth-switch">
-                        Don&apos;t have an account?{' '}
-                        <Link to="/register">
-                            Create one
+                        Already have an account?{' '}
+                        <Link to="/login">
+                            Sign in
                         </Link>
                     </p>
                 </div>
@@ -239,4 +260,4 @@ function LoginPage() {
     )
 }
 
-export default LoginPage
+export default RegisterPage
