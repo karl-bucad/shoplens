@@ -182,17 +182,27 @@ function ImportsPage() {
                     <h2>Choose Product CSV</h2>
 
                     <p>
-                        Select a CSV containing product name,
-                        shop, and category data.
+                        Select your own CSV or download the ShopLens sample
+                        dataset to try the full market research workflow.
                     </p>
                 </div>
 
-                <div className="upload-form">
-                    <input
-                        type="file"
-                        accept=".csv,text/csv"
-                        onChange={handleFileChange}
-                    />
+                <div className="import-source-actions">
+                    <div className="upload-form">
+                        <input
+                            type="file"
+                            accept=".csv,text/csv"
+                            onChange={handleFileChange}
+                        />
+                    </div>
+
+                    <a
+                        className="sample-csv-button"
+                        href="/samples/shoplens_sample.csv"
+                        download
+                    >
+                        Download Sample CSV
+                    </a>
                 </div>
 
                 {selectedFile ? (
@@ -202,7 +212,8 @@ function ImportsPage() {
                     </div>
                 ) : (
                     <p className="upload-helper">
-                        Choose a CSV to begin validation.
+                        New to ShopLens? Download the sample CSV, then upload it here
+                        to generate your first market snapshot.
                     </p>
                 )}
             </section>
